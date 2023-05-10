@@ -1,0 +1,6 @@
+{
+	"name": "ResellServer-LocalIR",
+	"properties": {
+		"type": "SelfHosted"
+	}
+}

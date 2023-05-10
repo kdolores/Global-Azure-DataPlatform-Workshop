@@ -1,0 +1,56 @@
+{
+	"name": "Dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "dim_landing_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "maestrosLanding"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "dim_raw_parquet",
+						"type": "DatasetReference"
+					},
+					"name": "maestrosRaw"
+				}
+			],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          CityKey as integer,",
+				"          WWICityID as integer,",
+				"          City as string,",
+				"          StateProvince as string,",
+				"          Country as string,",
+				"          Continent as string,",
+				"          SalesTerritory as string,",
+				"          Region as string,",
+				"          Subregion as string,",
+				"          LatestRecordedPopulation as long,",
+				"          ValidFrom as timestamp,",
+				"          ValidTo as timestamp,",
+				"          LineageKey as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> maestrosLanding",
+				"maestrosLanding sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> maestrosRaw"
+			]
+		}
+	}
+}

@@ -1,0 +1,17 @@
+{
+	"name": "sqlserver_ls",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "integrated security=True;data source=192.168.1.35;initial catalog=resell_datamart",
+			"userName": "LAPTOP-LGPTDI1T\\keyla",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIzNmYzZWJiNy0yMjg4LTQwYWItOGE2Zi1hZjg1ZDM2OTU4MDQiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "ResellServer-LocalIR",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

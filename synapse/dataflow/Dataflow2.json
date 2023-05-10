@@ -1,0 +1,230 @@
+{
+	"name": "Dataflow2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "movement_landing",
+						"type": "DatasetReference"
+					},
+					"name": "movement"
+				},
+				{
+					"dataset": {
+						"referenceName": "order",
+						"type": "DatasetReference"
+					},
+					"name": "order"
+				},
+				{
+					"dataset": {
+						"referenceName": "purchase_landing",
+						"type": "DatasetReference"
+					},
+					"name": "purchase"
+				},
+				{
+					"dataset": {
+						"referenceName": "sales_landing",
+						"type": "DatasetReference"
+					},
+					"name": "sales"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "movement_raw",
+						"type": "DatasetReference"
+					},
+					"name": "sinkMovement"
+				},
+				{
+					"dataset": {
+						"referenceName": "order_raw",
+						"type": "DatasetReference"
+					},
+					"name": "sinkOrder"
+				},
+				{
+					"dataset": {
+						"referenceName": "purchase_raw",
+						"type": "DatasetReference"
+					},
+					"name": "sinkPurchase"
+				},
+				{
+					"dataset": {
+						"referenceName": "sales_raw",
+						"type": "DatasetReference"
+					},
+					"name": "sinkSales"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "derivedColumn3"
+				},
+				{
+					"name": "derivedColumn4"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          MovementKey as long,",
+				"          DateKey as date,",
+				"          StockItemKey as integer,",
+				"          CustomerKey as integer,",
+				"          SupplierKey as integer,",
+				"          TransactionTypeKey as integer,",
+				"          WWIStockItemTransactionID as integer,",
+				"          WWIInvoiceID as integer,",
+				"          WWIPurchaseOrderID as integer,",
+				"          Quantity as integer,",
+				"          LineageKey as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> movement",
+				"source(output(",
+				"          OrderKey as long,",
+				"          CityKey as integer,",
+				"          CustomerKey as integer,",
+				"          StockItemKey as integer,",
+				"          OrderDateKey as date,",
+				"          PickedDateKey as date,",
+				"          SalespersonKey as integer,",
+				"          PickerKey as integer,",
+				"          WWIOrderID as integer,",
+				"          WWIBackorderID as integer,",
+				"          Description as string,",
+				"          Package as string,",
+				"          Quantity as integer,",
+				"          UnitPrice as string,",
+				"          TaxRate as string,",
+				"          TotalExcludingTax as string,",
+				"          TaxAmount as string,",
+				"          TotalIncludingTax as string,",
+				"          LineageKey as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> order",
+				"source(output(",
+				"          PurchaseKey as long,",
+				"          DateKey as date,",
+				"          SupplierKey as integer,",
+				"          StockItemKey as integer,",
+				"          WWIPurchaseOrderID as integer,",
+				"          OrderedOuters as integer,",
+				"          OrderedQuantity as integer,",
+				"          ReceivedOuters as integer,",
+				"          Package as string,",
+				"          IsOrderFinalized as boolean,",
+				"          LineageKey as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> purchase",
+				"source(output(",
+				"          Sale_Key as integer,",
+				"          City_Key as integer,",
+				"          Customer_Key as string,",
+				"          Bill_To_Customer_Key as string,",
+				"          Stock_Item_Key as string,",
+				"          Invoice_Date_Key as timestamp,",
+				"          Delivery_Date_Key as timestamp,",
+				"          Salesperson_Key as integer,",
+				"          WWI_Invoice_ID as integer,",
+				"          Description as string,",
+				"          Package as string,",
+				"          Quantity as string,",
+				"          Unit_Price as string,",
+				"          Tax_Rate as string,",
+				"          Total_Excluding_Tax as string,",
+				"          Tax_Amount as string,",
+				"          Profit as string,",
+				"          Total_Including_Tax as string,",
+				"          Total_Dry_Items as integer,",
+				"          Total_Chiller_Items as integer,",
+				"          Lineage_Key as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> sales",
+				"movement derive(Year = year(DateKey),",
+				"          Month = toString(DateKey, 'MM')) ~> derivedColumn1",
+				"order derive(Year = year(OrderDateKey),",
+				"          Month = toString(OrderDateKey,'MM')) ~> derivedColumn2",
+				"purchase derive(Year = year(DateKey),",
+				"          Month = toString(DateKey,'MM')) ~> derivedColumn3",
+				"sales derive(Year = year(Invoice_Date_Key),",
+				"          Month = toString(Invoice_Date_Key,'MM')) ~> derivedColumn4",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('key',",
+				"          0,",
+				"          Year,",
+				"          Month",
+				"     )) ~> sinkMovement",
+				"derivedColumn2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('key',",
+				"          0,",
+				"          Year,",
+				"          Month",
+				"     )) ~> sinkOrder",
+				"derivedColumn3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('key',",
+				"          0,",
+				"          Year,",
+				"          Month",
+				"     )) ~> sinkPurchase",
+				"derivedColumn4 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('key',",
+				"          0,",
+				"          Year,",
+				"          Month",
+				"     )) ~> sinkSales"
+			]
+		}
+	}
+}

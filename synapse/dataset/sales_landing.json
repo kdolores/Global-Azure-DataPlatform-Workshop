@@ -1,0 +1,106 @@
+{
+	"name": "sales_landing",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "adls_std365fop_ls",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "sales",
+				"fileSystem": "raw"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "Sale_Key",
+				"type": "INT32"
+			},
+			{
+				"name": "City_Key",
+				"type": "INT32"
+			},
+			{
+				"name": "Customer_Key",
+				"type": "UTF8"
+			},
+			{
+				"name": "Bill_To_Customer_Key",
+				"type": "UTF8"
+			},
+			{
+				"name": "Stock_Item_Key",
+				"type": "UTF8"
+			},
+			{
+				"name": "Invoice_Date_Key",
+				"type": "INT96"
+			},
+			{
+				"name": "Delivery_Date_Key",
+				"type": "INT96"
+			},
+			{
+				"name": "Salesperson_Key",
+				"type": "INT32"
+			},
+			{
+				"name": "WWI_Invoice_ID",
+				"type": "INT32"
+			},
+			{
+				"name": "Description",
+				"type": "UTF8"
+			},
+			{
+				"name": "Package",
+				"type": "UTF8"
+			},
+			{
+				"name": "Quantity",
+				"type": "UTF8"
+			},
+			{
+				"name": "Unit_Price",
+				"type": "UTF8"
+			},
+			{
+				"name": "Tax_Rate",
+				"type": "UTF8"
+			},
+			{
+				"name": "Total_Excluding_Tax",
+				"type": "UTF8"
+			},
+			{
+				"name": "Tax_Amount",
+				"type": "UTF8"
+			},
+			{
+				"name": "Profit",
+				"type": "UTF8"
+			},
+			{
+				"name": "Total_Including_Tax",
+				"type": "UTF8"
+			},
+			{
+				"name": "Total_Dry_Items",
+				"type": "INT32"
+			},
+			{
+				"name": "Total_Chiller_Items",
+				"type": "INT32"
+			},
+			{
+				"name": "Lineage_Key",
+				"type": "INT32"
+			}
+		]
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

@@ -1,0 +1,66 @@
+{
+	"name": "movement_landing",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "adls_std365fop_ls",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "movement",
+				"fileSystem": "raw"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "MovementKey",
+				"type": "INT64"
+			},
+			{
+				"name": "DateKey",
+				"type": "DATE"
+			},
+			{
+				"name": "StockItemKey",
+				"type": "INT32"
+			},
+			{
+				"name": "CustomerKey",
+				"type": "INT32"
+			},
+			{
+				"name": "SupplierKey",
+				"type": "INT32"
+			},
+			{
+				"name": "TransactionTypeKey",
+				"type": "INT32"
+			},
+			{
+				"name": "WWIStockItemTransactionID",
+				"type": "INT32"
+			},
+			{
+				"name": "WWIInvoiceID",
+				"type": "INT32"
+			},
+			{
+				"name": "WWIPurchaseOrderID",
+				"type": "INT32"
+			},
+			{
+				"name": "Quantity",
+				"type": "INT32"
+			},
+			{
+				"name": "LineageKey",
+				"type": "INT32"
+			}
+		]
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

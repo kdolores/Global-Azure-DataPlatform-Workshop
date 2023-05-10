@@ -1,0 +1,17 @@
+{
+	"name": "DDL_LAKE_CREATE_SCHEMA",
+	"properties": {
+		"content": {
+			"query": "CREATE DATABASE gab2023lake;\nGO\n\nUSE gab2023lake;\nGO\n\n--------------------------------------------------------------------------------------------\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'p39345ghJ#KL95909234nl0zBe'\nGO\n\n--------------------------------------------------------------------------------------------\nCREATE DATABASE SCOPED CREDENTIAL LKRDVUserIdentity WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2023-12-31T13:26:04Z&st=2023-05-10T05:26:04Z&spr=https&sig=v5PCDsQYpTAMQsl19L3t2I%2FK5aqWpupTxqekpFTr7Wc%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalRDVDataSource WITH (\n    LOCATION = 'https://stlakerdvprdeastus2001.dfs.core.windows.net/',\n    CREDENTIAL = LKRDVUserIdentity\n);\nGO\n\n--------------------------------------------------------------------------------------------\n\nCREATE DATABASE SCOPED CREDENTIAL LKMDVUserIdentity WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=b&srt=sco&sp=rwdlacyx&se=2023-12-31T13:15:46Z&st=2023-05-09T05:15:46Z&spr=https&sig=C9JslkGGagjYAaGoRAhwtsVaKpCJN6R2g6SY7O2zSTw%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalMDVDataSource WITH (\n    LOCATION = 'https://stlakemdvprdeastus2001.dfs.core.windows.net/',\n    CREDENTIAL = LKMDVUserIdentity\n);\nGO\n\n--------------------------------------------------------------------------------------------\n\nCREATE DATABASE SCOPED CREDENTIAL LKBDVUserIdentityNew WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2023-12-31T13:03:27Z&st=2023-05-10T05:03:27Z&spr=https&sig=w%2BuDs2eh1WY8SUQv4aTb%2F3X7uJ8Ige%2BgIWakupA8U4M%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalBDVDataSourceNew WITH (\n    LOCATION = 'https://stlakebdvprdeastus2001.dfs.core.windows.net/',\n    CREDENTIAL = LKBDVUserIdentityNew\n);\nGO\n\nCREATE DATABASE SCOPED CREDENTIAL LKBDVUserIdentityBlob WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2023-12-31T13:03:27Z&st=2023-05-10T05:03:27Z&spr=https&sig=w%2BuDs2eh1WY8SUQv4aTb%2F3X7uJ8Ige%2BgIWakupA8U4M%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalBDVDataSourceBlob WITH (\n    LOCATION = 'https://stlakebdvprdeastus2001.blob.core.windows.net/',\n    CREDENTIAL = LKBDVUserIdentityBlob\n);\nGO\n\n--------------------------------------------------------------------------------------------\n\nCREATE EXTERNAL FILE FORMAT LKDeltaFileFormat WITH (\n    FORMAT_TYPE = DELTA\n);\nGO\n\nCREATE EXTERNAL FILE FORMAT LKParquetFileFormat \nWITH (\n    FORMAT_TYPE = PARQUET,\n    DATA_COMPRESSION = 'org.apache.hadoop.io.compress.SnappyCodec'\n);\nGO\n\n\n-----REMOVE APP--------------------------------------\nSELECT * FROM sys.sql_logins;\n-----------------------------------------------------\n\nCREATE SCHEMA rdv AUTHORIZATION dbo;\nGO\n\nCREATE SCHEMA mdv AUTHORIZATION dbo;\nGO\n\nCREATE SCHEMA bdv AUTHORIZATION dbo;\nGO\n\nCREATE SCHEMA sdv AUTHORIZATION dbo;\nGO",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "gab2023lake",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

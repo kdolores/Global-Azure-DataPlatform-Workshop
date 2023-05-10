@@ -1,0 +1,25 @@
+{
+	"name": "tables_reselldm_sql",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "sqlserver_ls",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"tableName": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": {
+				"value": "@concat('wwi-',dataset().tableName)",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

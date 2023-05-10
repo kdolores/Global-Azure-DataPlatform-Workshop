@@ -1,0 +1,17 @@
+{
+	"name": "DQL_LAKE_CREATE_TABLE",
+	"properties": {
+		"content": {
+			"query": "USE gab2023lake;\nGO\n\n--Transacional con particion\nCREATE EXTERNAL TABLE rdv.dimcity(\n    City NVARCHAR(100)\n) WITH (\n    LOCATION = '/data/city/city.parquet',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = UPParquetFileFormat\n);\nGO\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "gab2023lake",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

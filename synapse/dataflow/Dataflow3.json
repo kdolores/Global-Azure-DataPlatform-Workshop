@@ -1,0 +1,68 @@
+{
+	"name": "Dataflow3",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "city_raw",
+						"type": "DatasetReference"
+					},
+					"name": "city"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "adls_stlakebdv_ls",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sinkCity"
+				}
+			],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          CityKey as integer,",
+				"          WWICityID as integer,",
+				"          City as string,",
+				"          StateProvince as string,",
+				"          Country as string,",
+				"          Continent as string,",
+				"          SalesTerritory as string,",
+				"          Region as string,",
+				"          Subregion as string,",
+				"          LatestRecordedPopulation as long,",
+				"          ValidFrom as timestamp,",
+				"          ValidTo as timestamp,",
+				"          LineageKey as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     fileList: true,",
+				"     format: 'parquet') ~> city",
+				"city sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'data',",
+				"     folderPath: 'city',",
+				"     overwrite:true,",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sinkCity"
+			]
+		}
+	}
+}

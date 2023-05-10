@@ -1,0 +1,66 @@
+{
+	"name": "purchase_landing",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "adls_std365fop_ls",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "purchase",
+				"fileSystem": "raw"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "PurchaseKey",
+				"type": "INT64"
+			},
+			{
+				"name": "DateKey",
+				"type": "DATE"
+			},
+			{
+				"name": "SupplierKey",
+				"type": "INT32"
+			},
+			{
+				"name": "StockItemKey",
+				"type": "INT32"
+			},
+			{
+				"name": "WWIPurchaseOrderID",
+				"type": "INT32"
+			},
+			{
+				"name": "OrderedOuters",
+				"type": "INT32"
+			},
+			{
+				"name": "OrderedQuantity",
+				"type": "INT32"
+			},
+			{
+				"name": "ReceivedOuters",
+				"type": "INT32"
+			},
+			{
+				"name": "Package",
+				"type": "UTF8"
+			},
+			{
+				"name": "IsOrderFinalized",
+				"type": "BOOLEAN"
+			},
+			{
+				"name": "LineageKey",
+				"type": "INT32"
+			}
+		]
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

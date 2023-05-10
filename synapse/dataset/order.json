@@ -1,0 +1,98 @@
+{
+	"name": "order",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "adls_std365fop_ls",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "order",
+				"fileSystem": "raw"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "OrderKey",
+				"type": "INT64"
+			},
+			{
+				"name": "CityKey",
+				"type": "INT32"
+			},
+			{
+				"name": "CustomerKey",
+				"type": "INT32"
+			},
+			{
+				"name": "StockItemKey",
+				"type": "INT32"
+			},
+			{
+				"name": "OrderDateKey",
+				"type": "DATE"
+			},
+			{
+				"name": "PickedDateKey",
+				"type": "DATE"
+			},
+			{
+				"name": "SalespersonKey",
+				"type": "INT32"
+			},
+			{
+				"name": "PickerKey",
+				"type": "INT32"
+			},
+			{
+				"name": "WWIOrderID",
+				"type": "INT32"
+			},
+			{
+				"name": "WWIBackorderID",
+				"type": "INT32"
+			},
+			{
+				"name": "Description",
+				"type": "UTF8"
+			},
+			{
+				"name": "Package",
+				"type": "UTF8"
+			},
+			{
+				"name": "Quantity",
+				"type": "INT32"
+			},
+			{
+				"name": "UnitPrice",
+				"type": "UTF8"
+			},
+			{
+				"name": "TaxRate",
+				"type": "UTF8"
+			},
+			{
+				"name": "TotalExcludingTax",
+				"type": "UTF8"
+			},
+			{
+				"name": "TaxAmount",
+				"type": "UTF8"
+			},
+			{
+				"name": "TotalIncludingTax",
+				"type": "UTF8"
+			},
+			{
+				"name": "LineageKey",
+				"type": "INT32"
+			}
+		]
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}
