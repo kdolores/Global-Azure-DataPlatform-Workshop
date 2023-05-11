@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "ea0f5db7-a0d5-4463-9ad8-410e067510d5"
+				"spark.autotune.trackingId": "99037532-559f-44d6-8737-79ae827ed0be"
 			}
 		},
 		"metadata": {
@@ -46,7 +46,7 @@
 				"memory": 28,
 				"automaticScaleJobs": false
 			},
-			"sessionKeepAliveTimeout": 5
+			"sessionKeepAliveTimeout": 30
 		},
 		"cells": [
 			{
@@ -63,15 +63,23 @@
 					}
 				},
 				"source": [
-					"from pyspark.sql import SparkSession\r\n",
-					"account_name = 'stlakerdvprdeastus001'\r\n",
-					"container_name = 'raw'\r\n",
-					"relative_path = 'city'\r\n",
-					"linked_service_name = 'adls_stlakerdv_ls'\r\n",
+					" from delta.tables import *\r\n",
+					" from pyspark.sql import SparkSession\r\n",
+					"source_account_name = 'stlakerdvprdeastus001'\r\n",
+					"source_container_name = 'raw'\r\n",
+					"source_relative_path = 'city'\r\n",
+					"source_linked_service_name = 'adls_stlakerdv_ls'\r\n",
 					"\r\n",
-					"sas_token = mssparkutils.credentials.getConnectionStringOrCreds(linked_service_name)"
+					"source_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(source_linked_service_name)\r\n",
+					"\r\n",
+					"sync_account_name = 'stlakebdvprdeastus001'\r\n",
+					"sync_container_name = 'comercial'\r\n",
+					"sync_relative_path = 'dimcity'\r\n",
+					"sync_linked_service_name = 'adls_stlakebdv_ls'\r\n",
+					"\r\n",
+					"sync_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(sync_linked_service_name)"
 				],
-				"execution_count": 4
+				"execution_count": 39
 			},
 			{
 				"cell_type": "code",
@@ -87,25 +95,79 @@
 					}
 				},
 				"source": [
-					"#path = 'abfss://%s@%s.dfs.core.windows.net/%s' % (container_name,account_name,relative_path)   \r\n",
-					"path = 'wasbs://%s@%s.blob.core.windows.net/%s' % (container_name, account_name, relative_path)\r\n",
+					"# Input Files\r\n",
 					"\r\n",
-					"spark.conf.set('fs.azure.sas.%s.%s.blob.core.windows.net' % (container_name,account_name),sas_token)\r\n",
+					"path = 'wasbs://%s@%s.blob.core.windows.net/%s' % (source_container_name, source_account_name, source_relative_path)\r\n",
+					"\r\n",
+					"spark.conf.set('fs.azure.sas.%s.%s.blob.core.windows.net' % (source_container_name,source_account_name),source_sas_token)\r\n",
 					"  \r\n",
 					"print('Remote blob path: ' + path)"
 				],
-				"execution_count": 5
+				"execution_count": 37
 			},
 			{
 				"cell_type": "code",
 				"metadata": {
+					"jupyter": {
+						"outputs_hidden": true,
+						"source_hidden": false
+					},
 					"collapsed": false
 				},
 				"source": [
+					"# Load a file into a dataframe\r\n",
+					"\r\n",
 					"df = spark.read.load(path, format='parquet')\r\n",
 					"display(df.limit(10))"
 				],
-				"execution_count": 6
+				"execution_count": 31
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Output Files\r\n",
+					"\r\n",
+					"path = 'wasbs://%s@%s.blob.core.windows.net/%s' % (sync_container_name, sync_account_name, sync_relative_path)\r\n",
+					"\r\n",
+					"spark.conf.set('fs.azure.sas.%s.%s.blob.core.windows.net' % (sync_container_name,sync_account_name),sync_sas_token)\r\n",
+					"  \r\n",
+					"print('Remote blob path: ' + path)"
+				],
+				"execution_count": 40
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"# Save the dataframe as a delta table\r\n",
+					"\r\n",
+					"\r\n",
+					"df.write.format(\"delta\").save('/demo')\r\n",
+					"\r\n",
+					""
+				],
+				"execution_count": 42
 			},
 			{
 				"cell_type": "code",
