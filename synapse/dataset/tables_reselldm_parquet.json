@@ -19,11 +19,10 @@
 					"value": "@concat('',dataset().tablePath,'.parquet')",
 					"type": "Expression"
 				},
-				"folderPath": {
+				"fileSystem": {
 					"value": "@dataset().tablePath",
 					"type": "Expression"
-				},
-				"fileSystem": "raw"
+				}
 			},
 			"compressionCodec": "snappy"
 		},
