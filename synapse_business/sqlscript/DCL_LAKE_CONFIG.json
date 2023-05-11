@@ -2,12 +2,12 @@
 	"name": "DCL_LAKE_CONFIG",
 	"properties": {
 		"content": {
-			"query": "CREATE DATABASE gab2023lake;\nGO\n\nUSE gab2023lake;\nGO\n\n--------------------------------------------------------------------------------------------\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'p39345ghJ#KL95909234nl0zBe'",
+			"query": "CREATE DATABASE gab2023lake;\nGO\n\nUSE gab2023lake;\nGO\n\n--------------------------------------------------------------------------------------------\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'p39345ghJ#KL95909234nl0zBe'\n\n--------------------------------------------------------------------------------------------\n--#Creation \n\n\n\nCREATE EXTERNAL FILE FORMAT LKDeltaFileFormat WITH (\n    FORMAT_TYPE = DELTA\n);\nGO\n\nCREATE EXTERNAL FILE FORMAT LKParquetFileFormat \nWITH (\n    FORMAT_TYPE = PARQUET,\n    DATA_COMPRESSION = 'org.apache.hadoop.io.compress.SnappyCodec'\n);\nGO\n\n",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "master",
+				"databaseName": "gab2023lake",
 				"poolName": "Built-in"
 			},
 			"resultLimit": 5000
