@@ -27,7 +27,7 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "maestros_csv",
+						"referenceName": "maestros_business_csv",
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
@@ -47,7 +47,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Lookup1').output.value",
+						"value": "@activity('LookupDim').output.value",
 						"type": "Expression"
 					},
 					"activities": [
@@ -74,6 +74,17 @@
 											"value": "@item().Prop_0",
 											"type": "Expression"
 										},
+										"type": "string"
+									},
+									"loadDate": {
+										"value": {
+											"value": "@utcnow()",
+											"type": "Expression"
+										},
+										"type": "string"
+									},
+									"creationUser": {
+										"value": "keyla.doloresmendez@outlook.com",
 										"type": "string"
 									}
 								},
@@ -140,7 +151,7 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "maestros_csv",
+						"referenceName": "trx_business_csv",
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
@@ -160,7 +171,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Lookup1').output.value",
+						"value": "@activity('LookupTrx').output.value",
 						"type": "Expression"
 					},
 					"activities": [
@@ -187,6 +198,17 @@
 											"value": "@item().Prop_0",
 											"type": "Expression"
 										},
+										"type": "string"
+									},
+									"loadDate": {
+										"value": {
+											"value": "@utcnow()",
+											"type": "Expression"
+										},
+										"type": "string"
+									},
+									"creationUser": {
+										"value": "keyla.doloresmendez@outlook.com",
 										"type": "string"
 									}
 								},
