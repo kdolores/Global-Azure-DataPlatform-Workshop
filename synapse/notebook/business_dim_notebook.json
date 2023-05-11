@@ -1,5 +1,5 @@
 {
-	"name": "business_trx_notebook",
+	"name": "business_dim_notebook",
 	"properties": {
 		"nbformat": 4,
 		"nbformat_minor": 2,
@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "0c944085-01ee-4e78-a024-de841e4f3d02"
+				"spark.autotune.trackingId": "00ca3676-0324-4a63-8ec8-891a67e15403"
 			}
 		},
 		"metadata": {
@@ -61,16 +61,14 @@
 							"deleting": false
 						}
 					},
-					"tags": [
-						"parameters"
-					]
+					"tags": []
 				},
 				"source": [
-					"relative_path = \"\"\r\n",
-					"loadDate = \"\"\r\n",
-					"creationUser = \"\""
+					"relative_path = ''\r\n",
+					"loadDate = ''\r\n",
+					"creationUser = ''"
 				],
-				"execution_count": null
+				"execution_count": 72
 			},
 			{
 				"cell_type": "code",
@@ -97,12 +95,12 @@
 					"\r\n",
 					"sync_account_name = 'stlakebdvprdeastus001'\r\n",
 					"sync_container_name = 'comercial'\r\n",
-					"sync_relative_path = 'fact' + relative_path\r\n",
+					"sync_relative_path = 'dim' + relative_path\r\n",
 					"sync_linked_service_name = 'adls_stlakebdv_ls'\r\n",
 					"\r\n",
 					"sync_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(sync_linked_service_name)"
 				],
-				"execution_count": 4
+				"execution_count": 73
 			},
 			{
 				"cell_type": "code",
@@ -126,7 +124,7 @@
 					"  \r\n",
 					"print('Remote blob path: ' + path)"
 				],
-				"execution_count": 5
+				"execution_count": 74
 			},
 			{
 				"cell_type": "code",
@@ -141,9 +139,10 @@
 					"# Load a file into a dataframe\r\n",
 					"\r\n",
 					"df = spark.read.load(path, format='parquet')\r\n",
-					"display(df.limit(10))"
+					"\r\n",
+					"# display(df.limit(10))"
 				],
-				"execution_count": 9
+				"execution_count": 75
 			},
 			{
 				"cell_type": "code",
@@ -167,7 +166,7 @@
 					"  \r\n",
 					"print('Remote blob path: ' + path2)"
 				],
-				"execution_count": 7
+				"execution_count": 76
 			},
 			{
 				"cell_type": "code",
@@ -188,12 +187,13 @@
 					"\r\n",
 					"df.withColumn(\"LoadDate\" , lit(loadDate)) \\\r\n",
 					"    .withColumn(\"CreationUser\" ,lit(creationUser)) \\\r\n",
-					"    .write \\\r\n",
-					"    .mode(\"overwrite\") \\\r\n",
+					"    .write.mode(\"overwrite\") \\\r\n",
 					"    .format(\"delta\") \\\r\n",
-					"    .save(path2)"
+					"    .save(path2)\r\n",
+					"\r\n",
+					""
 				],
-				"execution_count": 13
+				"execution_count": 77
 			}
 		]
 	}
