@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "0c944085-01ee-4e78-a024-de841e4f3d02"
+				"spark.autotune.trackingId": "585d2713-108a-4974-8eb3-91ba75a1eeb6"
 			}
 		},
 		"metadata": {
@@ -66,9 +66,9 @@
 					]
 				},
 				"source": [
-					"relative_path = \"\"\r\n",
-					"loadDate = \"\"\r\n",
-					"creationUser = \"\""
+					"relative_path = ''\r\n",
+					"loadDate = ''\r\n",
+					"creationUser = ''"
 				],
 				"execution_count": null
 			},
@@ -184,11 +184,13 @@
 				},
 				"source": [
 					"# Save the dataframe as a delta table\r\n",
+					"\r\n",
 					"from pyspark.sql.functions import lit\r\n",
 					"\r\n",
 					"df.withColumn(\"LoadDate\" , lit(loadDate)) \\\r\n",
 					"    .withColumn(\"CreationUser\" ,lit(creationUser)) \\\r\n",
 					"    .write \\\r\n",
+					"    .partitionBy(\"Year\", \"Month\") \\\r\n",
 					"    .mode(\"overwrite\") \\\r\n",
 					"    .format(\"delta\") \\\r\n",
 					"    .save(path2)"

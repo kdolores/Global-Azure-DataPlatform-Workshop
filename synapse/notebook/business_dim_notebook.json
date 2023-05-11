@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "00ca3676-0324-4a63-8ec8-891a67e15403"
+				"spark.autotune.trackingId": "d7f8af93-a5ff-4a5c-9bbc-fe56d2f765cf"
 			}
 		},
 		"metadata": {
@@ -64,11 +64,11 @@
 					"tags": []
 				},
 				"source": [
-					"relative_path = ''\r\n",
-					"loadDate = ''\r\n",
-					"creationUser = ''"
+					"relative_path = 'stockholding'\r\n",
+					"loadDate = '2023-05-02T06:07:23.4317168Z'\r\n",
+					"creationUser = 'keyla.doloresmendez@outlook.com'"
 				],
-				"execution_count": 72
+				"execution_count": 103
 			},
 			{
 				"cell_type": "code",
@@ -100,7 +100,7 @@
 					"\r\n",
 					"sync_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(sync_linked_service_name)"
 				],
-				"execution_count": 73
+				"execution_count": 104
 			},
 			{
 				"cell_type": "code",
@@ -124,7 +124,7 @@
 					"  \r\n",
 					"print('Remote blob path: ' + path)"
 				],
-				"execution_count": 74
+				"execution_count": 105
 			},
 			{
 				"cell_type": "code",
@@ -142,7 +142,7 @@
 					"\r\n",
 					"# display(df.limit(10))"
 				],
-				"execution_count": 75
+				"execution_count": 106
 			},
 			{
 				"cell_type": "code",
@@ -166,7 +166,7 @@
 					"  \r\n",
 					"print('Remote blob path: ' + path2)"
 				],
-				"execution_count": 76
+				"execution_count": 107
 			},
 			{
 				"cell_type": "code",
@@ -193,7 +193,7 @@
 					"\r\n",
 					""
 				],
-				"execution_count": 77
+				"execution_count": 108
 			}
 		]
 	}
