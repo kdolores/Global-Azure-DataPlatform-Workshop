@@ -2,12 +2,12 @@
 	"name": "DDL_LAKE_CREATE_SCHEMA",
 	"properties": {
 		"content": {
-			"query": "CREATE DATABASE gab2023lake;\nGO\n\nUSE gab2023lake;\nGO\n\nCREATE SCHEMA bdv_comercial AUTHORIZATION dbo;\nGO\n",
+			"query": "CREATE DATABASE db_bicomercial;\nGO\n\nUSE db_bicomercial;\nGO\n\nCREATE SCHEMA ventaonline AUTHORIZATION dbo;\nGO\n",
 			"metadata": {
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "master",
+				"databaseName": "db_bicomercial",
 				"poolName": "Built-in"
 			},
 			"resultLimit": 5000
