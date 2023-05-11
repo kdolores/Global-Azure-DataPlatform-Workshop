@@ -23,7 +23,7 @@
 					"value": "@dataset().tableName",
 					"type": "Expression"
 				},
-				"fileSystem": "data"
+				"fileSystem": "raw"
 			},
 			"compressionCodec": "snappy"
 		},
