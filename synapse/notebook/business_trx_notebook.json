@@ -1,5 +1,5 @@
 {
-	"name": "business_dim_notebook",
+	"name": "business_trx_notebook",
 	"properties": {
 		"nbformat": 4,
 		"nbformat_minor": 2,
@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "2d178bf1-afdf-42ec-93cf-966fc0cbbd24"
+				"spark.autotune.trackingId": "51ad3f3a-e284-457d-8b0e-9357bbdf9e35"
 			}
 		},
 		"metadata": {
@@ -74,12 +74,12 @@
 					"\r\n",
 					"sync_account_name = 'stlakebdvprdeastus001'\r\n",
 					"sync_container_name = 'comercial'\r\n",
-					"sync_relative_path = 'fact' + \r\n",
+					"sync_relative_path = 'factorder'\r\n",
 					"sync_linked_service_name = 'adls_stlakebdv_ls'\r\n",
 					"\r\n",
 					"sync_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(sync_linked_service_name)"
 				],
-				"execution_count": 14
+				"execution_count": 4
 			},
 			{
 				"cell_type": "code",
@@ -162,11 +162,12 @@
 				"source": [
 					"# Save the dataframe as a delta table\r\n",
 					"\r\n",
-					"df.write.mode(\"overwrite\").format(\"delta\").save(path2)\r\n",
-					"\r\n",
-					""
+					"df.write.partitionBy(\"Year\", \"Month\") \\\r\n",
+					"    .mode(\"overwrite\") \\\r\n",
+					"    .format(\"delta\") \\\r\n",
+					"    .save(path2)"
 				],
-				"execution_count": 8
+				"execution_count": 13
 			}
 		]
 	}
