@@ -11,7 +11,7 @@
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"folderPath": "order",
-				"fileSystem": "data"
+				"fileSystem": "raw"
 			},
 			"compressionCodec": "snappy"
 		},
