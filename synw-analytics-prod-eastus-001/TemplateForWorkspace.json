@@ -1,0 +1,240 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "synw-analytics-prod-eastus-001"
+		},
+		"synw-analytics-prod-eastus-001-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'synw-analytics-prod-eastus-001-WorkspaceDefaultSqlServer'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:synw-analytics-prod-eastus-001.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"synw-analytics-prod-eastus-001-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stlakebdvprdeastus001.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/synw-analytics-prod-eastus-001-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('synw-analytics-prod-eastus-001-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synw-analytics-prod-eastus-001-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('synw-analytics-prod-eastus-001-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				},
+				"managedVirtualNetwork": {
+					"type": "ManagedVirtualNetworkReference",
+					"referenceName": "default"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DCL_LAKE_CONFIG')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "CREATE DATABASE gab2023lake;\nGO\n\nUSE gab2023lake;\nGO\n\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'p39345ghJ#KL95909234nl0zBe'\n---------------------------------------------------------------------------\n--#External Data Source - Creation \n---------------------------------------------------------------------------\nCREATE DATABASE SCOPED CREDENTIAL LKBDVUserIdentity WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2023-12-31T13:07:24Z&st=2023-05-11T05:07:24Z&spr=https&sig=ugMvb9pD46uBxOBc8QCVt2qefPib6yX6pc8iRx92b0c%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalBDVDataSourceNew WITH (\n    LOCATION = 'https://stlakebdvprdeastus001.dfs.core.windows.net/',\n    CREDENTIAL = LKBDVUserIdentity\n);\nGO\n---------------------------------------------------------------------------\n--#External File Formats - Creation \n---------------------------------------------------------------------------\nCREATE EXTERNAL FILE FORMAT LKDeltaFileFormat WITH (\n    FORMAT_TYPE = DELTA\n);\nGO\n\nCREATE EXTERNAL FILE FORMAT LKParquetFileFormat \nWITH (\n    FORMAT_TYPE = PARQUET,\n    DATA_COMPRESSION = 'org.apache.hadoop.io.compress.SnappyCodec'\n);\nGO",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "gab2023lake",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DDL_LAKE_CREATE_SCHEMA')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "CREATE DATABASE gab2023lake;\nGO\n\nUSE gab2023lake;\nGO\n\n--------------------------------------------------------------------------------------------\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'p39345ghJ#KL95909234nl0zBe'\nGO\n\n--------------------------------------------------------------------------------------------\nCREATE DATABASE SCOPED CREDENTIAL LKRDVUserIdentity WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2023-12-31T13:26:04Z&st=2023-05-10T05:26:04Z&spr=https&sig=v5PCDsQYpTAMQsl19L3t2I%2FK5aqWpupTxqekpFTr7Wc%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalRDVDataSource WITH (\n    LOCATION = 'https://stlakerdvprdeastus2001.dfs.core.windows.net/',\n    CREDENTIAL = LKRDVUserIdentity\n);\nGO\n\n--------------------------------------------------------------------------------------------\n\nCREATE DATABASE SCOPED CREDENTIAL LKMDVUserIdentity WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=b&srt=sco&sp=rwdlacyx&se=2023-12-31T13:15:46Z&st=2023-05-09T05:15:46Z&spr=https&sig=C9JslkGGagjYAaGoRAhwtsVaKpCJN6R2g6SY7O2zSTw%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalMDVDataSource WITH (\n    LOCATION = 'https://stlakemdvprdeastus2001.dfs.core.windows.net/',\n    CREDENTIAL = LKMDVUserIdentity\n);\nGO\n\n--------------------------------------------------------------------------------------------\n\nCREATE DATABASE SCOPED CREDENTIAL LKBDVUserIdentityNew WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2023-12-31T13:03:27Z&st=2023-05-10T05:03:27Z&spr=https&sig=w%2BuDs2eh1WY8SUQv4aTb%2F3X7uJ8Ige%2BgIWakupA8U4M%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalBDVDataSourceNew WITH (\n    LOCATION = 'https://stlakebdvprdeastus2001.dfs.core.windows.net/',\n    CREDENTIAL = LKBDVUserIdentityNew\n);\nGO\n\nCREATE DATABASE SCOPED CREDENTIAL LKBDVUserIdentityBlob WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2023-12-31T13:03:27Z&st=2023-05-10T05:03:27Z&spr=https&sig=w%2BuDs2eh1WY8SUQv4aTb%2F3X7uJ8Ige%2BgIWakupA8U4M%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalBDVDataSourceBlob WITH (\n    LOCATION = 'https://stlakebdvprdeastus2001.blob.core.windows.net/',\n    CREDENTIAL = LKBDVUserIdentityBlob\n);\nGO\n\n--------------------------------------------------------------------------------------------\n\n\n\n-----REMOVE APP--------------------------------------\nSELECT * FROM sys.sql_logins;\n-----------------------------------------------------\n\nCREATE SCHEMA rdv AUTHORIZATION dbo;\nGO\n\nCREATE SCHEMA mdv AUTHORIZATION dbo;\nGO\n\nCREATE SCHEMA bdv AUTHORIZATION dbo;\nGO\n\nCREATE SCHEMA sdv AUTHORIZATION dbo;\nGO",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DDL_LAKE_CREATE_TABLE')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "-----------------------------------------------------\n---RAW ZONE:\n-----------------------------------------------------\nCREATE EXTERNAL TABLE rdv.d365fop_city(\n    [CityKey] [int],\n\t[WWICityID] [int],\n\t[City] [nvarchar](50),\n\t[StateProvince] [nvarchar](50),\n\t[Country] [nvarchar](60),\n\t[Continent] [nvarchar](30),\n\t[SalesTerritory] [nvarchar](50),\n\t[Region] [nvarchar](30),\n\t[Subregion] [nvarchar](30),\n\t[LatestRecordedPopulation] [bigint],\n\t[ValidFrom] [datetime2](7),\n\t[ValidTo] [datetime2](7),\n\t[LineageKey] [int]\n) WITH (\n    LOCATION = '/data/city/city.parquet',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = UPParquetFileFormat\n);\nGO\n\n------------------------------------------------------------------------\nSELECT TOP(10) * \nFROM rdv.d365fop_city;\nGO\n------------------------------------------------------------------------\n\nCREATE EXTERNAL TABLE rdv.d365fop_movement(\n\t[MovementKey] [bigint],\n\t[DateKey] [date],\n\t[StockItemKey] [int],\n\t[CustomerKey] [int],\n\t[SupplierKey] [int],\n\t[TransactionTypeKey] [int],\n\t[WWIStockItemTransactionID] [int],\n\t[WWIInvoiceID] [int],\n\t[WWIPurchaseOrderID] [int],\n\t[Quantity] [int],\n\t[LineageKey] [int],\n\t[year] [nvarchar](4),\n\t[month] [nvarchar](2),\n\t[day] [nvarchar] (2)\n) WITH (\n    LOCATION = '/data/movement/year=*/month=*/day=*/*.parquet',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = UPParquetFileFormat\n);\nGO\n\n--------------------------------------------------------------------------------------\nSELECT TOP(10) * \nFROM rdv.d365fop_movement2 a\nWHERE a.Year='2013' and a.Month='01'\nGO\n--------------------------------------------------------------------------------------\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n------------------------------------------------------------------------\n\nCREATE EXTERNAL TABLE rdv.d365fop_customer (\n    [CustomerKey] [int] NOT NULL,\n\t[WWICustomerID] [int] NOT NULL,\n\t[Customer] [nvarchar](100) NOT NULL,\n\t[BillToCustomer] [nvarchar](100) NOT NULL,\n\t[Category] [nvarchar](50) NOT NULL,\n\t[BuyingGroup] [nvarchar](50) NOT NULL,\n\t[PrimaryContact] [nvarchar](50) NOT NULL,\n\t[PostalCode] [nvarchar](10) NOT NULL,\n\t[ValidFrom] [datetime2](7) NOT NULL,\n\t[ValidTo] [datetime2](7) NOT NULL,\n\t[LineageKey] [int] NOT NULL\n) WITH (\n    LOCATION = '/data/customer/',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = LKDeltaFileFormat\n);\n\nCREATE EXTERNAL TABLE rdv.d365fop_employee (\n    [EmployeeKey] [int] NOT NULL,\n\t[WWIEmployeeID] [int] NOT NULL,\n\t[Employee] [nvarchar](50) NOT NULL,\n\t[PreferredName] [nvarchar](50) NOT NULL,\n\t[IsSalesperson] [bit] NOT NULL,\n\t[ValidFrom] [datetime2](7) NOT NULL,\n\t[ValidTo] [datetime2](7) NOT NULL,\n\t[LineageKey] [int] NOT NULL\n) WITH (\n    LOCATION = '/data/employee/',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = LKDeltaFileFormat\n);\n\nCREATE EXTERNAL TABLE rdv.d365fop_paymentmethod (\n\t[PaymentMethodKey] [int] NOT NULL,\n\t[WWIPaymentMethodID] [int] NOT NULL,\n\t[PaymentMethod] [nvarchar](50) NOT NULL,\n\t[ValidFrom] [datetime2](7) NOT NULL,\n\t[ValidTo] [datetime2](7) NOT NULL,\n\t[LineageKey] [int] NOT NULL\n) WITH (\n    LOCATION = '/data/paymentmethod/',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = LKDeltaFileFormat\n);\n\nCREATE EXTERNAL TABLE rdv.d365fop_stockitem (\n\t[StockItemKey] [int] NOT NULL,\n\t[WWIStockItemID] [int] NOT NULL,\n\t[Stock Item] [nvarchar](100) NOT NULL,\n\t[Color] [nvarchar](20) NOT NULL,\n\t[SellingPackage] [nvarchar](50) NOT NULL,\n\t[Buying Package] [nvarchar](50) NOT NULL,\n\t[Brand] [nvarchar](50) NOT NULL,\n\t[Size] [nvarchar](20) NOT NULL,\n\t[LeadTimeDays] [int] NOT NULL,\n\t[QuantityPerOuter] [int] NOT NULL,\n\t[IsChillerStock] [bit] NOT NULL,\n\t[Barcode] [nvarchar](50) NULL,\n\t[TaxRate] [decimal](18, 3) NOT NULL,\n\t[UnitPrice] [decimal](18, 2) NOT NULL,\n\t[RecommendedRetailPrice] [decimal](18, 2) NULL,\n\t[TypicalWeightPerUnit] [decimal](18, 3) NOT NULL,\n\t[ValidFrom] [datetime2](7) NOT NULL,\n\t[ValidTo] [datetime2](7) NOT NULL,\n\t[LineageKey] [int] NOT NULL\n) WITH (\n    LOCATION = '/data/sotckitem/',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = LKDeltaFileFormat\n);\n\nCREATE EXTERNAL TABLE rdv.d365fop_supplier (\n    [SupplierKey] [int] NOT NULL,\n\t[WWISupplierID] [int] NOT NULL,\n\t[Supplier] [nvarchar](100) NOT NULL,\n\t[Category] [nvarchar](50) NOT NULL,\n\t[PrimaryContact] [nvarchar](50) NOT NULL,\n\t[SupplierReference] [nvarchar](20) NULL,\n\t[PaymentDays] [int] NOT NULL,\n\t[PostalCode] [nvarchar](10) NOT NULL,\n\t[ValidFrom] [datetime2](7) NOT NULL,\n\t[ValidTo] [datetime2](7) NOT NULL,\n\t[LineageKey] [int] NOT NULL\n) WITH (\n    LOCATION = '/data/supplier/',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = LKDeltaFileFormat\n);\n\n\n\n\n\n\n\n\n\n\n-----------------------------------------------------",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DDL_LAKE_OPERATION_MODEL')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "\nUSE gab2023lake;\nGO\n\nCREATE SCHEMA ms AUTHORIZATION dbo;\nGO\n----------------------------------------------------------------------------------------------------------\nCREATE DATABASE SCOPED CREDENTIAL LKMSUserIdentity WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2023-12-31T16:46:54Z&st=2023-05-10T08:46:54Z&spr=https&sig=H%2FXXBydhN0u5td25VbhtPdGV5B1DDM9000fHDPCqRwM%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalMSDataSource WITH (\n    LOCATION = 'https://stlakemsprdeastus2001.dfs.core.windows.net/',\n    CREDENTIAL = LKMSUserIdentity\n);\nGO\n----------------------------------------------------------------------------------------------------------\nIF NOT EXISTS ( SELECT * FROM sys.external_tables WHERE object_id = OBJECT_ID('ope.ObjectCatalog') )\nCREATE EXTERNAL TABLE ms.ObjectCatalog (\n    [Id] [UNIQUEIDENTIFIER],\n    [Name] [NVARCHAR](50),\n    [ZoneName] [NVARCHAR] (20),\n    [Type] [NVARCHAR] (10),\n    [CreationUser] [NVARCHAR](20),\n    [CreationDate] [DATETIME2](7)\n) WITH (\n    LOCATION = '/operation/ObjectCatalog/*.parquet',\n    DATA_SOURCE = ExternalMSDataSource,\n    FILE_FORMAT = LKParquetFileFormat\n);\nGO\n----------------------------------------------------------------------------------------------------------\nIF NOT EXISTS ( SELECT * FROM sys.external_tables WHERE object_id = OBJECT_ID('ope.ProcessMetadata') )\nCREATE EXTERNAL TABLE ms.ProcessMetadata (\n    [Id] [UNIQUEIDENTIFIER],\n    [ExecId] [UNIQUEIDENTIFIER],\n    [ExecDate] [DATETIME2](7),\n    [ZoneName] [NVARCHAR](20),\n    [ProcessName] [NVARCHAR](50),\n    [InTableName] [NVARCHAR](100),\n    [OutTableName] [NVARCHAR](100),\n    [OutTableName] [NVARCHAR](100),\n    [ExecStartDate] [DATETIME2](7),\n    [ExecEndDate] [DATETIME2](7),\n    [ExecStatus] [NVARCHAR](20),\n    [ExecRowRead] [INT],\n    [ExecRowWrite] [INT],\n    [CreationUser] [NVARCHAR](20),\n    [CreationDate] [DATETIME2](7)\n) WITH (\n    LOCATION = '/operation/ProcessMetadata/Year=*/*.parquet',\n    DATA_SOURCE = ExternalMSDataSource,\n    FILE_FORMAT = LKParquetFileFormat\n);\nGO\n\nIF NOT EXISTS ( SELECT * FROM sys.external_tables WHERE object_id = OBJECT_ID('ope.QualityMeasures') )\nCREATE EXTERNAL TABLE ms.QualityMeasures (\n    [Id] [UNIQUEIDENTIFIER],\n    [ResourceName] [NVARCHAR](50),\n    [FieldName] [NVARCHAR](50),\n    [MetricName] [NVARCHAR](50),\n    [Measurement] [FLOAT](50),\n    [Value] [NVARCHAR] (100),\n    [Annotation] [NVARCHAR] (100),\n    [LoadDate] [DATETIME2](7),\n    [UpdatedUser] [NVARCHAR](50),\n    [ReviewUser] [NVARCHAR](50) \n) WITH (\n    LOCATION = '/quality/QualityMeasures/Year=*/*.parquet',\n    DATA_SOURCE = ExternalMSDataSource,\n    FILE_FORMAT = LKParquetFileFormat\n);\nGO\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DQL_LAKE_CREATE_TABLE')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "USE gab2023lake;\nGO\n\n--Transacional con particion\nCREATE EXTERNAL TABLE rdv.dimcity(\n    City NVARCHAR(100)\n) WITH (\n    LOCATION = '/data/city/city.parquet',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = UPParquetFileFormat\n);\nGO\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Metadata_Synapse_Serverless')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "USE gab2023lake;\nGO\n\nSELECT * FROM sys.all_columns\n\nSELECT * FROM INFORMATION_SCHEMA.TABLES;\n\nSELECT * FROM INFORMATION_SCHEMA.VIEWS;\n\nSELECT * FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE;\n\nSELECT * FROM INFORMATION_SCHEMA.SCHEMATA;\n\nSELECT * FROM sys.credentials;\nSELECT * FROM sys.database_credentials;\nSELECT * FROM sys.database_query_store_options;\n\n\nSELECT * FROM sys.all_views ORDER BY name DESC;\n\nSELECT * FROM sys.stats_columns\nOPTION (LABEL = 'My Query');\n\nSELECT TOP 10 *\nFROM sys.dm_pdw_exec_requests\nORDER BY total_elapsed_time DESC;\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'data/date/date.parquet',\n        DATA_SOURCE ='ExternalRDVDataSource',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n\nSELECT * FROM sys.dm_exec_connections \nSELECT * FROM sys.dm_exec_sessions \nSELECT * FROM sys.dm_exec_requests",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {},
+			"dependsOn": []
+		}
+	]
+}

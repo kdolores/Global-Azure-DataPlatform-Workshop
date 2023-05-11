@@ -1,0 +1,15 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "synw-analytics-prod-eastus-001"
+		},
+		"synw-analytics-prod-eastus-001-WorkspaceDefaultSqlServer_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:synw-analytics-prod-eastus-001.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"synw-analytics-prod-eastus-001-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://stlakebdvprdeastus001.dfs.core.windows.net"
+		}
+	}
+}
