@@ -2054,7 +2054,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "96b74af2-ebf3-4e93-9460-7ecf13891082"
+						"spark.autotune.trackingId": "27f1dd9c-6a5b-44b7-9e62-6e58b10b4737"
 					}
 				},
 				"metadata": {
@@ -2082,7 +2082,7 @@
 						"memory": 28,
 						"automaticScaleJobs": false
 					},
-					"sessionKeepAliveTimeout": 5
+					"sessionKeepAliveTimeout": 30
 				},
 				"cells": [
 					{
@@ -2099,16 +2099,24 @@
 							}
 						},
 						"source": [
-							"from pyspark.sql import SparkSession\r\n",
-							"account_name = 'stlakerdvprdeastus001'\r\n",
-							"container_name = 'raw'\r\n",
-							"relative_path = 'city'\r\n",
-							"linked_service_name = 'adls_stlakerdv_ls'\r\n",
+							" from delta.tables import *\r\n",
+							" from pyspark.sql import SparkSession\r\n",
+							"source_account_name = 'stlakerdvprdeastus001'\r\n",
+							"source_container_name = 'raw'\r\n",
+							"source_relative_path = 'city'\r\n",
+							"source_linked_service_name = 'adls_stlakerdv_ls'\r\n",
 							"\r\n",
-							"sas_token = mssparkutils.credentials.getConnectionStringOrCreds(linked_service_name)"
+							"source_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(source_linked_service_name)\r\n",
+							"\r\n",
+							"sync_account_name = 'stlakebdvprdeastus001'\r\n",
+							"sync_container_name = 'comercial'\r\n",
+							"sync_relative_path = 'dimcity'\r\n",
+							"sync_linked_service_name = 'adls_stlakebdv_ls'\r\n",
+							"\r\n",
+							"sync_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(sync_linked_service_name)"
 						],
 						"outputs": [],
-						"execution_count": 4
+						"execution_count": 39
 					},
 					{
 						"cell_type": "code",
@@ -2124,27 +2132,83 @@
 							}
 						},
 						"source": [
-							"#path = 'abfss://%s@%s.dfs.core.windows.net/%s' % (container_name,account_name,relative_path)   \r\n",
-							"path = 'wasbs://%s@%s.blob.core.windows.net/%s' % (container_name, account_name, relative_path)\r\n",
+							"# Input Files\r\n",
 							"\r\n",
-							"spark.conf.set('fs.azure.sas.%s.%s.blob.core.windows.net' % (container_name,account_name),sas_token)\r\n",
+							"path = 'wasbs://%s@%s.blob.core.windows.net/%s' % (source_container_name, source_account_name, source_relative_path)\r\n",
+							"\r\n",
+							"spark.conf.set('fs.azure.sas.%s.%s.blob.core.windows.net' % (source_container_name,source_account_name),source_sas_token)\r\n",
 							"  \r\n",
 							"print('Remote blob path: ' + path)"
 						],
 						"outputs": [],
-						"execution_count": 5
+						"execution_count": 37
 					},
 					{
 						"cell_type": "code",
 						"metadata": {
+							"jupyter": {
+								"outputs_hidden": true,
+								"source_hidden": false
+							},
 							"collapsed": false
 						},
 						"source": [
+							"# Load a file into a dataframe\r\n",
+							"\r\n",
 							"df = spark.read.load(path, format='parquet')\r\n",
 							"display(df.limit(10))"
 						],
 						"outputs": [],
-						"execution_count": 6
+						"execution_count": 31
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"# Output Files\r\n",
+							"\r\n",
+							"path = 'wasbs://%s@%s.blob.core.windows.net/%s' % (sync_container_name, sync_account_name, sync_relative_path)\r\n",
+							"\r\n",
+							"spark.conf.set('fs.azure.sas.%s.%s.blob.core.windows.net' % (sync_container_name,sync_account_name),sync_sas_token)\r\n",
+							"  \r\n",
+							"print('Remote blob path: ' + path)"
+						],
+						"outputs": [],
+						"execution_count": 40
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"# Save the dataframe as a delta table\r\n",
+							"\r\n",
+							"\r\n",
+							"df.write.format(\"delta\").save('/demo')\r\n",
+							"\r\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": 42
 					},
 					{
 						"cell_type": "code",
@@ -2170,20 +2234,72 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/Notebook 3')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "9d88ebc7-b38c-48e5-b3e3-6dbc3546b2d3"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "python"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"microsoft": {
+								"language": "python"
+							}
+						},
+						"source": [
+							"%%pyspark\r\n",
+							"df = spark.read.load('abfss://raw@stlakerdvprdeastus001.dfs.core.windows.net/city/city.parquet', format='parquet')\r\n",
+							"display(df.limit(10))"
+						],
+						"outputs": [],
+						"execution_count": null
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/SparkPool')]",
 			"type": "Microsoft.Synapse/workspaces/bigDataPools",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"autoPause": {
 					"enabled": true,
-					"delayInMinutes": 15
+					"delayInMinutes": 10
 				},
 				"autoScale": {
 					"enabled": true,
 					"maxNodeCount": 3,
 					"minNodeCount": 3
 				},
-				"nodeCount": 0,
+				"nodeCount": 3,
 				"nodeSize": "Small",
 				"nodeSizeFamily": "MemoryOptimized",
 				"sparkVersion": "3.3",
