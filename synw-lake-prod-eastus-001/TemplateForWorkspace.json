@@ -794,7 +794,7 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"folderPath": "movement",
-						"fileSystem": "data"
+						"fileSystem": "raw"
 					},
 					"compressionCodec": "snappy"
 				},
@@ -921,7 +921,7 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"folderPath": "order",
-						"fileSystem": "data"
+						"fileSystem": "raw"
 					},
 					"compressionCodec": "snappy"
 				},
@@ -1016,7 +1016,7 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"folderPath": "purchase",
-						"fileSystem": "data"
+						"fileSystem": "raw"
 					},
 					"compressionCodec": "snappy"
 				},
@@ -1151,7 +1151,7 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"folderPath": "sales",
-						"fileSystem": "data"
+						"fileSystem": "raw"
 					},
 					"compressionCodec": "snappy"
 				},
@@ -2425,6 +2425,60 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/raw_datapipeline_stlakerdv_copy1')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow2",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Dataflow2",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"movement": {},
+									"order": {},
+									"purchase": {},
+									"sales": {},
+									"sinkMovement": {},
+									"sinkOrder": {},
+									"sinkPurchase": {},
+									"sinkSales": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-10T06:39:42Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/Dataflow2')]"
+			]
 		}
 	]
 }
