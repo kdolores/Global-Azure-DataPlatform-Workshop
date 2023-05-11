@@ -2040,275 +2040,25 @@
 				"nbformat": 4,
 				"nbformat_minor": 2,
 				"bigDataPool": {
-					"referenceName": "SparkPool001",
+					"referenceName": "SparkPool",
 					"type": "BigDataPoolReference"
 				},
 				"sessionProperties": {
-					"driverMemory": "56g",
-					"driverCores": 8,
-					"executorMemory": "56g",
-					"executorCores": 8,
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
 					"numExecutors": 2,
 					"runAsWorkspaceSystemIdentity": false,
 					"conf": {
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "7f26c18d-1efe-472a-9776-10852d4c7ae8"
+						"spark.autotune.trackingId": "57cb1247-3ec2-424d-8a1e-f7a3bd7c6f50"
 					}
 				},
 				"metadata": {
 					"saveOutput": true,
-					"synapse_widget": {
-						"version": "0.1",
-						"state": {
-							"b58d9519-a5bc-4892-bf4a-62c85acb9f0c": {
-								"type": "Synapse.DataFrame",
-								"sync_state": {
-									"table": {
-										"rows": [
-											{
-												"0": "0",
-												"1": "0",
-												"2": "Unknown",
-												"3": "N/A",
-												"4": "N/A",
-												"5": "N/A",
-												"6": "N/A",
-												"7": "N/A",
-												"8": "N/A",
-												"9": "0",
-												"10": "2013-01-01 00:00:00",
-												"11": "9999-12-31 23:59:59.999999",
-												"12": "0"
-											},
-											{
-												"0": "1",
-												"1": "5450",
-												"2": "Carrollton",
-												"3": "New York",
-												"4": "United States",
-												"5": "North America",
-												"6": "Mideast",
-												"7": "Americas",
-												"8": "Northern America",
-												"9": "0",
-												"10": "2013-01-01 00:00:00",
-												"11": "2013-01-01 00:02:00",
-												"12": "1"
-											},
-											{
-												"0": "2",
-												"1": "5451",
-												"2": "Carrollton",
-												"3": "Virginia",
-												"4": "United States",
-												"5": "North America",
-												"6": "Southeast",
-												"7": "Americas",
-												"8": "Northern America",
-												"9": "4574",
-												"10": "2013-01-01 00:00:00",
-												"11": "2013-01-01 00:03:00",
-												"12": "1"
-											},
-											{
-												"0": "3",
-												"1": "5452",
-												"2": "Carrollton",
-												"3": "Illinois",
-												"4": "United States",
-												"5": "North America",
-												"6": "Great Lakes",
-												"7": "Americas",
-												"8": "Northern America",
-												"9": "2484",
-												"10": "2013-01-01 00:00:00",
-												"11": "2013-01-01 00:05:00",
-												"12": "1"
-											},
-											{
-												"0": "4",
-												"1": "5453",
-												"2": "Carrollton",
-												"3": "Missouri",
-												"4": "United States",
-												"5": "North America",
-												"6": "Plains",
-												"7": "Americas",
-												"8": "Northern America",
-												"9": "3784",
-												"10": "2013-01-01 00:00:00",
-												"11": "2013-01-01 00:03:00",
-												"12": "1"
-											},
-											{
-												"0": "5",
-												"1": "5454",
-												"2": "Carrollton",
-												"3": "Ohio",
-												"4": "United States",
-												"5": "North America",
-												"6": "Great Lakes",
-												"7": "Americas",
-												"8": "Northern America",
-												"9": "3241",
-												"10": "2013-01-01 00:00:00",
-												"11": "2013-01-01 00:04:00",
-												"12": "1"
-											},
-											{
-												"0": "6",
-												"1": "5455",
-												"2": "Carrollton",
-												"3": "Kentucky",
-												"4": "United States",
-												"5": "North America",
-												"6": "Southeast",
-												"7": "Americas",
-												"8": "Northern America",
-												"9": "3938",
-												"10": "2013-01-01 00:00:00",
-												"11": "2013-01-01 00:05:00",
-												"12": "1"
-											},
-											{
-												"0": "7",
-												"1": "5456",
-												"2": "Carrollton",
-												"3": "Georgia",
-												"4": "United States",
-												"5": "North America",
-												"6": "Southeast",
-												"7": "Americas",
-												"8": "Northern America",
-												"9": "24388",
-												"10": "2013-01-01 00:00:00",
-												"11": "2013-01-01 00:02:00",
-												"12": "1"
-											},
-											{
-												"0": "8",
-												"1": "5457",
-												"2": "Carrollton",
-												"3": "Alabama",
-												"4": "United States",
-												"5": "North America",
-												"6": "Southeast",
-												"7": "Americas",
-												"8": "Northern America",
-												"9": "1019",
-												"10": "2013-01-01 00:00:00",
-												"11": "2013-01-01 00:01:00",
-												"12": "1"
-											},
-											{
-												"0": "9",
-												"1": "5458",
-												"2": "Carrollton",
-												"3": "Mississippi",
-												"4": "United States",
-												"5": "North America",
-												"6": "Southeast",
-												"7": "Americas",
-												"8": "Northern America",
-												"9": "190",
-												"10": "2013-01-01 00:00:00",
-												"11": "2013-01-01 00:04:00",
-												"12": "1"
-											}
-										],
-										"schema": [
-											{
-												"key": "0",
-												"name": "CityKey",
-												"type": "int"
-											},
-											{
-												"key": "1",
-												"name": "WWICityID",
-												"type": "int"
-											},
-											{
-												"key": "2",
-												"name": "City",
-												"type": "string"
-											},
-											{
-												"key": "3",
-												"name": "StateProvince",
-												"type": "string"
-											},
-											{
-												"key": "4",
-												"name": "Country",
-												"type": "string"
-											},
-											{
-												"key": "5",
-												"name": "Continent",
-												"type": "string"
-											},
-											{
-												"key": "6",
-												"name": "SalesTerritory",
-												"type": "string"
-											},
-											{
-												"key": "7",
-												"name": "Region",
-												"type": "string"
-											},
-											{
-												"key": "8",
-												"name": "Subregion",
-												"type": "string"
-											},
-											{
-												"key": "9",
-												"name": "LatestRecordedPopulation",
-												"type": "bigint"
-											},
-											{
-												"key": "10",
-												"name": "ValidFrom",
-												"type": "timestamp"
-											},
-											{
-												"key": "11",
-												"name": "ValidTo",
-												"type": "timestamp"
-											},
-											{
-												"key": "12",
-												"name": "LineageKey",
-												"type": "int"
-											}
-										],
-										"truncated": false
-									},
-									"isSummary": false,
-									"language": "scala"
-								},
-								"persist_state": {
-									"view": {
-										"type": "details",
-										"chartOptions": {
-											"chartType": "bar",
-											"aggregationType": "sum",
-											"categoryFieldKeys": [
-												"1"
-											],
-											"seriesFieldKeys": [
-												"0"
-											],
-											"isStacked": false
-										}
-									}
-								}
-							}
-						}
-					},
 					"enableDebugMode": false,
 					"kernelspec": {
 						"name": "synapse_pyspark",
@@ -2318,20 +2068,19 @@
 						"name": "python"
 					},
 					"a365ComputeOptions": {
-						"id": "/subscriptions/af9c01d6-5edb-4165-8a7b-093ce5571c12/resourceGroups/rg-gab2023-prod-001/providers/Microsoft.Synapse/workspaces/synw-gab2023-prod-eastus2-001/bigDataPools/SparkPool001",
-						"name": "SparkPool001",
+						"id": "/subscriptions/9f93871a-3a02-497b-97a8-191d92b531ef/resourceGroups/rg-lake-operation-prd-001/providers/Microsoft.Synapse/workspaces/synw-lake-prod-eastus-001/bigDataPools/SparkPool",
+						"name": "SparkPool",
 						"type": "Spark",
-						"endpoint": "https://synw-gab2023-prod-eastus2-001.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/SparkPool001",
+						"endpoint": "https://synw-lake-prod-eastus-001.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/SparkPool",
 						"auth": {
 							"type": "AAD",
-							"authResource": "https://dev.azuresynapse.net",
-							"authHeader": null
+							"authResource": "https://dev.azuresynapse.net"
 						},
 						"sparkVersion": "3.3",
-						"nodeCount": 10,
-						"cores": 8,
-						"memory": 56,
-						"extraHeader": null
+						"nodeCount": 3,
+						"cores": 4,
+						"memory": 28,
+						"automaticScaleJobs": false
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -2351,15 +2100,15 @@
 						},
 						"source": [
 							"from pyspark.sql import SparkSession\r\n",
-							"account_name = 'stlakerdvprdeastus2001'\r\n",
-							"container_name = 'data'\r\n",
+							"account_name = 'stlakerdvprdeastus001'\r\n",
+							"container_name = 'raw'\r\n",
 							"relative_path = 'city'\r\n",
 							"linked_service_name = 'adls_stlakerdv_ls'\r\n",
 							"\r\n",
 							"sas_token = mssparkutils.credentials.getConnectionStringOrCreds(linked_service_name)"
 						],
 						"outputs": [],
-						"execution_count": 1
+						"execution_count": 4
 					},
 					{
 						"cell_type": "code",
@@ -2383,7 +2132,7 @@
 							"print('Remote blob path: ' + path)"
 						],
 						"outputs": [],
-						"execution_count": 2
+						"execution_count": 5
 					},
 					{
 						"cell_type": "code",
@@ -2395,7 +2144,7 @@
 							"display(df.limit(10))"
 						],
 						"outputs": [],
-						"execution_count": 3
+						"execution_count": 6
 					},
 					{
 						"cell_type": "code",
@@ -2413,11 +2162,37 @@
 						"source": [
 							""
 						],
-						"outputs": []
+						"outputs": [],
+						"execution_count": null
 					}
 				]
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SparkPool')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"autoPause": {
+					"enabled": true,
+					"delayInMinutes": 15
+				},
+				"autoScale": {
+					"enabled": true,
+					"maxNodeCount": 3,
+					"minNodeCount": 3
+				},
+				"nodeCount": 0,
+				"nodeSize": "Small",
+				"nodeSizeFamily": "MemoryOptimized",
+				"sparkVersion": "3.3",
+				"isComputeIsolationEnabled": false,
+				"sessionLevelPackagesEnabled": false,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "eastus2"
 		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/default')]",
@@ -2425,60 +2200,6 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/raw_datapipeline_stlakerdv_copy1')]",
-			"type": "Microsoft.Synapse/workspaces/pipelines",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"activities": [
-					{
-						"name": "Data flow2",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "Dataflow2",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"movement": {},
-									"order": {},
-									"purchase": {},
-									"sales": {},
-									"sinkMovement": {},
-									"sinkOrder": {},
-									"sinkPurchase": {},
-									"sinkSales": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {},
-					"cancelAfter": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2023-05-10T06:39:42Z"
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/dataflows/Dataflow2')]"
-			]
 		}
 	]
 }
