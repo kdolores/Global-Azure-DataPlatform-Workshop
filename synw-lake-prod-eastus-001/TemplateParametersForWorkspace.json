@@ -1,0 +1,54 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "synw-lake-prod-eastus-001"
+		},
+		"adls_ls_accountKey": {
+			"value": ""
+		},
+		"adls_std365fop_ls_accountKey": {
+			"value": ""
+		},
+		"adls_stlakebdv_ls_accountKey": {
+			"value": ""
+		},
+		"adls_stlakerdv_ls_accountKey": {
+			"value": ""
+		},
+		"sqlserver_ls_connectionString": {
+			"value": "Integrated Security=True;Data Source=192.168.1.35;Initial Catalog=resell_datamart"
+		},
+		"sqlserver_ls_password": {
+			"value": ""
+		},
+		"synw-gab2023-prod-eastus2-001-WorkspaceDefaultSqlServer_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:synw-gab2023-prod-eastus2-001.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"synw-lake-prod-eastus-001-WorkspaceDefaultSqlServer_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:synw-lake-prod-eastus-001.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"adls_ls_properties_typeProperties_url": {
+			"value": "https://std365fopprdeastus001.dfs.core.windows.net/"
+		},
+		"adls_std365fop_ls_properties_typeProperties_url": {
+			"value": "https://std365fopprdeastus001.dfs.core.windows.net/"
+		},
+		"adls_stlakebdv_ls_properties_typeProperties_url": {
+			"value": "https://stlakebdvprdeastus001.dfs.core.windows.net/"
+		},
+		"adls_stlakerdv_ls_properties_typeProperties_url": {
+			"value": "https://stlakerdvprdeastus001.dfs.core.windows.net/"
+		},
+		"sqlserver_ls_properties_typeProperties_userName": {
+			"value": "LAPTOP-LGPTDI1T\\keyla"
+		},
+		"synw-gab2023-prod-eastus2-001-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://stgab2023prodeastus2001.dfs.core.windows.net"
+		},
+		"synw-lake-prod-eastus-001-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://stlakemsprdeastus001.dfs.core.windows.net"
+		}
+	}
+}

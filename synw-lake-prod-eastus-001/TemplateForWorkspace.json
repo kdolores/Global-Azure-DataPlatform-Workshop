@@ -1,0 +1,2430 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "synw-lake-prod-eastus-001"
+		},
+		"adls_ls_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'adls_ls'"
+		},
+		"adls_std365fop_ls_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'adls_std365fop_ls'"
+		},
+		"adls_stlakebdv_ls_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'adls_stlakebdv_ls'"
+		},
+		"adls_stlakerdv_ls_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'adls_stlakerdv_ls'"
+		},
+		"sqlserver_ls_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'sqlserver_ls'",
+			"defaultValue": "Integrated Security=True;Data Source=192.168.1.35;Initial Catalog=resell_datamart"
+		},
+		"sqlserver_ls_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'sqlserver_ls'"
+		},
+		"synw-gab2023-prod-eastus2-001-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'synw-gab2023-prod-eastus2-001-WorkspaceDefaultSqlServer'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:synw-gab2023-prod-eastus2-001.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"synw-lake-prod-eastus-001-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'synw-lake-prod-eastus-001-WorkspaceDefaultSqlServer'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:synw-lake-prod-eastus-001.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"adls_ls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://std365fopprdeastus001.dfs.core.windows.net/"
+		},
+		"adls_std365fop_ls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://std365fopprdeastus001.dfs.core.windows.net/"
+		},
+		"adls_stlakebdv_ls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stlakebdvprdeastus001.dfs.core.windows.net/"
+		},
+		"adls_stlakerdv_ls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stlakerdvprdeastus001.dfs.core.windows.net/"
+		},
+		"sqlserver_ls_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "LAPTOP-LGPTDI1T\\keyla"
+		},
+		"synw-gab2023-prod-eastus2-001-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stgab2023prodeastus2001.dfs.core.windows.net"
+		},
+		"synw-lake-prod-eastus-001-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://stlakemsprdeastus001.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/business_datapipeline_stlakebdv')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "dataflow_business_delta",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Dataflow3",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"city": {},
+									"sinkCity": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-10T06:54:58Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/Dataflow3')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/landing_datapipeline_std365fop')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "filelist_csv",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup1').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": true,
+										"stagingSettings": {
+											"linkedServiceName": {
+												"referenceName": "adls_ls",
+												"type": "LinkedServiceReference"
+											},
+											"path": "staging"
+										},
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "tables_reselldm_sql",
+											"type": "DatasetReference",
+											"parameters": {
+												"tableName": {
+													"value": "@item().Prop_0",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "tables_reselldm_parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"tablePath": {
+													"value": "@item().Prop_0",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-10T06:39:16Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/filelist_csv')]",
+				"[concat(variables('workspaceId'), '/datasets/tables_reselldm_sql')]",
+				"[concat(variables('workspaceId'), '/datasets/tables_reselldm_parquet')]",
+				"[concat(variables('workspaceId'), '/linkedServices/adls_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/raw_datapipeline_stlakerdv')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Maestros",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "maestros_csv",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Maestros",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Maestros').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "ParquetSource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											}
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "dim_landing_parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"tableName": {
+													"value": "@item().Prop_0",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "dim_raw_parquet",
+											"type": "DatasetReference",
+											"parameters": {
+												"tableName": {
+													"value": "@item().Prop_0",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"name": "Data flow2",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Dataflow2",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"movement": {},
+									"order": {},
+									"purchase": {},
+									"sales": {},
+									"sinkMovement": {},
+									"sinkOrder": {},
+									"sinkPurchase": {},
+									"sinkSales": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-10T06:39:42Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/maestros_csv')]",
+				"[concat(variables('workspaceId'), '/dataflows/Dataflow2')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_landing_parquet')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_raw_parquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/city_raw')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_stlakerdv_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "city",
+						"fileSystem": "data"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "CityKey",
+						"type": "INT32"
+					},
+					{
+						"name": "WWICityID",
+						"type": "INT32"
+					},
+					{
+						"name": "City",
+						"type": "UTF8"
+					},
+					{
+						"name": "StateProvince",
+						"type": "UTF8"
+					},
+					{
+						"name": "Country",
+						"type": "UTF8"
+					},
+					{
+						"name": "Continent",
+						"type": "UTF8"
+					},
+					{
+						"name": "SalesTerritory",
+						"type": "UTF8"
+					},
+					{
+						"name": "Region",
+						"type": "UTF8"
+					},
+					{
+						"name": "Subregion",
+						"type": "UTF8"
+					},
+					{
+						"name": "LatestRecordedPopulation",
+						"type": "INT64"
+					},
+					{
+						"name": "ValidFrom",
+						"type": "INT96"
+					},
+					{
+						"name": "ValidTo",
+						"type": "INT96"
+					},
+					{
+						"name": "LineageKey",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_stlakerdv_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dim_landing_parquet')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_std365fop_ls",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"tableName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat(dataset().tableName,'.parquet')",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().tableName",
+							"type": "Expression"
+						},
+						"fileSystem": "raw"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "CityKey",
+						"type": "INT32"
+					},
+					{
+						"name": "WWICityID",
+						"type": "INT32"
+					},
+					{
+						"name": "City",
+						"type": "UTF8"
+					},
+					{
+						"name": "StateProvince",
+						"type": "UTF8"
+					},
+					{
+						"name": "Country",
+						"type": "UTF8"
+					},
+					{
+						"name": "Continent",
+						"type": "UTF8"
+					},
+					{
+						"name": "SalesTerritory",
+						"type": "UTF8"
+					},
+					{
+						"name": "Region",
+						"type": "UTF8"
+					},
+					{
+						"name": "Subregion",
+						"type": "UTF8"
+					},
+					{
+						"name": "LatestRecordedPopulation",
+						"type": "INT64"
+					},
+					{
+						"name": "ValidFrom",
+						"type": "INT96"
+					},
+					{
+						"name": "ValidTo",
+						"type": "INT96"
+					},
+					{
+						"name": "LineageKey",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_std365fop_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/dim_raw_parquet')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_stlakerdv_ls",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"tableName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat(dataset().tableName,'.parquet')",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().tableName",
+							"type": "Expression"
+						},
+						"fileSystem": "data"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_stlakerdv_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/filelist_csv')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "filelist.csv",
+						"folderPath": "auxiliar",
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/maestros_csv')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_std365fop_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "maestros.csv",
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_std365fop_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/movement_landing')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_std365fop_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "movement",
+						"fileSystem": "raw"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "MovementKey",
+						"type": "INT64"
+					},
+					{
+						"name": "DateKey",
+						"type": "DATE"
+					},
+					{
+						"name": "StockItemKey",
+						"type": "INT32"
+					},
+					{
+						"name": "CustomerKey",
+						"type": "INT32"
+					},
+					{
+						"name": "SupplierKey",
+						"type": "INT32"
+					},
+					{
+						"name": "TransactionTypeKey",
+						"type": "INT32"
+					},
+					{
+						"name": "WWIStockItemTransactionID",
+						"type": "INT32"
+					},
+					{
+						"name": "WWIInvoiceID",
+						"type": "INT32"
+					},
+					{
+						"name": "WWIPurchaseOrderID",
+						"type": "INT32"
+					},
+					{
+						"name": "Quantity",
+						"type": "INT32"
+					},
+					{
+						"name": "LineageKey",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_std365fop_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/movement_raw')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_stlakerdv_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "movement",
+						"fileSystem": "data"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_stlakerdv_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/order')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_std365fop_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "order",
+						"fileSystem": "raw"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "OrderKey",
+						"type": "INT64"
+					},
+					{
+						"name": "CityKey",
+						"type": "INT32"
+					},
+					{
+						"name": "CustomerKey",
+						"type": "INT32"
+					},
+					{
+						"name": "StockItemKey",
+						"type": "INT32"
+					},
+					{
+						"name": "OrderDateKey",
+						"type": "DATE"
+					},
+					{
+						"name": "PickedDateKey",
+						"type": "DATE"
+					},
+					{
+						"name": "SalespersonKey",
+						"type": "INT32"
+					},
+					{
+						"name": "PickerKey",
+						"type": "INT32"
+					},
+					{
+						"name": "WWIOrderID",
+						"type": "INT32"
+					},
+					{
+						"name": "WWIBackorderID",
+						"type": "INT32"
+					},
+					{
+						"name": "Description",
+						"type": "UTF8"
+					},
+					{
+						"name": "Package",
+						"type": "UTF8"
+					},
+					{
+						"name": "Quantity",
+						"type": "INT32"
+					},
+					{
+						"name": "UnitPrice",
+						"type": "UTF8"
+					},
+					{
+						"name": "TaxRate",
+						"type": "UTF8"
+					},
+					{
+						"name": "TotalExcludingTax",
+						"type": "UTF8"
+					},
+					{
+						"name": "TaxAmount",
+						"type": "UTF8"
+					},
+					{
+						"name": "TotalIncludingTax",
+						"type": "UTF8"
+					},
+					{
+						"name": "LineageKey",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_std365fop_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/order_raw')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_stlakerdv_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "order",
+						"fileSystem": "data"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_stlakerdv_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/purchase_landing')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_std365fop_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "purchase",
+						"fileSystem": "raw"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "PurchaseKey",
+						"type": "INT64"
+					},
+					{
+						"name": "DateKey",
+						"type": "DATE"
+					},
+					{
+						"name": "SupplierKey",
+						"type": "INT32"
+					},
+					{
+						"name": "StockItemKey",
+						"type": "INT32"
+					},
+					{
+						"name": "WWIPurchaseOrderID",
+						"type": "INT32"
+					},
+					{
+						"name": "OrderedOuters",
+						"type": "INT32"
+					},
+					{
+						"name": "OrderedQuantity",
+						"type": "INT32"
+					},
+					{
+						"name": "ReceivedOuters",
+						"type": "INT32"
+					},
+					{
+						"name": "Package",
+						"type": "UTF8"
+					},
+					{
+						"name": "IsOrderFinalized",
+						"type": "BOOLEAN"
+					},
+					{
+						"name": "LineageKey",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_std365fop_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/purchase_raw')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_stlakerdv_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "purchase",
+						"fileSystem": "data"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_stlakerdv_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sales_landing')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_std365fop_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "sales",
+						"fileSystem": "raw"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "Sale_Key",
+						"type": "INT32"
+					},
+					{
+						"name": "City_Key",
+						"type": "INT32"
+					},
+					{
+						"name": "Customer_Key",
+						"type": "UTF8"
+					},
+					{
+						"name": "Bill_To_Customer_Key",
+						"type": "UTF8"
+					},
+					{
+						"name": "Stock_Item_Key",
+						"type": "UTF8"
+					},
+					{
+						"name": "Invoice_Date_Key",
+						"type": "INT96"
+					},
+					{
+						"name": "Delivery_Date_Key",
+						"type": "INT96"
+					},
+					{
+						"name": "Salesperson_Key",
+						"type": "INT32"
+					},
+					{
+						"name": "WWI_Invoice_ID",
+						"type": "INT32"
+					},
+					{
+						"name": "Description",
+						"type": "UTF8"
+					},
+					{
+						"name": "Package",
+						"type": "UTF8"
+					},
+					{
+						"name": "Quantity",
+						"type": "UTF8"
+					},
+					{
+						"name": "Unit_Price",
+						"type": "UTF8"
+					},
+					{
+						"name": "Tax_Rate",
+						"type": "UTF8"
+					},
+					{
+						"name": "Total_Excluding_Tax",
+						"type": "UTF8"
+					},
+					{
+						"name": "Tax_Amount",
+						"type": "UTF8"
+					},
+					{
+						"name": "Profit",
+						"type": "UTF8"
+					},
+					{
+						"name": "Total_Including_Tax",
+						"type": "UTF8"
+					},
+					{
+						"name": "Total_Dry_Items",
+						"type": "INT32"
+					},
+					{
+						"name": "Total_Chiller_Items",
+						"type": "INT32"
+					},
+					{
+						"name": "Lineage_Key",
+						"type": "INT32"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_std365fop_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sales_raw')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_stlakerdv_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "sales",
+						"fileSystem": "data"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_stlakerdv_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/tables_reselldm_parquet')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_std365fop_ls",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"tablePath": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat('',dataset().tablePath,'.parquet')",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().tablePath",
+							"type": "Expression"
+						}
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_std365fop_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/tables_reselldm_sql')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "sqlserver_ls",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"tableName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": {
+						"value": "@concat('wwi-',dataset().tableName)",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/sqlserver_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/transaccionales_csv')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_std365fop_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "transaccionales.csv",
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_std365fop_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/adls_ls')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('adls_ls_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('adls_ls_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/adls_std365fop_ls')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('adls_std365fop_ls_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('adls_std365fop_ls_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/adls_stlakebdv_ls')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('adls_stlakebdv_ls_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('adls_stlakebdv_ls_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/adls_stlakerdv_ls')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('adls_stlakerdv_ls_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('adls_stlakerdv_ls_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sqlserver_ls')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": "[parameters('sqlserver_ls_connectionString')]",
+					"userName": "[parameters('sqlserver_ls_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('sqlserver_ls_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "Resell-Local-IR",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/Resell-Local-IR')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synw-gab2023-prod-eastus2-001-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('synw-gab2023-prod-eastus2-001-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synw-gab2023-prod-eastus2-001-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('synw-gab2023-prod-eastus2-001-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synw-lake-prod-eastus-001-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('synw-lake-prod-eastus-001-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synw-lake-prod-eastus-001-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('synw-lake-prod-eastus-001-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				},
+				"managedVirtualNetwork": {
+					"type": "ManagedVirtualNetworkReference",
+					"referenceName": "default"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Resell-Local-IR')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ResellServer-LocalIR')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Dataflow1')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "dim_landing_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "maestrosLanding"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "dim_raw_parquet",
+								"type": "DatasetReference"
+							},
+							"name": "maestrosRaw"
+						}
+					],
+					"transformations": [],
+					"scriptLines": [
+						"source(output(",
+						"          CityKey as integer,",
+						"          WWICityID as integer,",
+						"          City as string,",
+						"          StateProvince as string,",
+						"          Country as string,",
+						"          Continent as string,",
+						"          SalesTerritory as string,",
+						"          Region as string,",
+						"          Subregion as string,",
+						"          LatestRecordedPopulation as long,",
+						"          ValidFrom as timestamp,",
+						"          ValidTo as timestamp,",
+						"          LineageKey as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> maestrosLanding",
+						"maestrosLanding sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> maestrosRaw"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/dim_landing_parquet')]",
+				"[concat(variables('workspaceId'), '/datasets/dim_raw_parquet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Dataflow2')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "movement_landing",
+								"type": "DatasetReference"
+							},
+							"name": "movement"
+						},
+						{
+							"dataset": {
+								"referenceName": "order",
+								"type": "DatasetReference"
+							},
+							"name": "order"
+						},
+						{
+							"dataset": {
+								"referenceName": "purchase_landing",
+								"type": "DatasetReference"
+							},
+							"name": "purchase"
+						},
+						{
+							"dataset": {
+								"referenceName": "sales_landing",
+								"type": "DatasetReference"
+							},
+							"name": "sales"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "movement_raw",
+								"type": "DatasetReference"
+							},
+							"name": "sinkMovement"
+						},
+						{
+							"dataset": {
+								"referenceName": "order_raw",
+								"type": "DatasetReference"
+							},
+							"name": "sinkOrder"
+						},
+						{
+							"dataset": {
+								"referenceName": "purchase_raw",
+								"type": "DatasetReference"
+							},
+							"name": "sinkPurchase"
+						},
+						{
+							"dataset": {
+								"referenceName": "sales_raw",
+								"type": "DatasetReference"
+							},
+							"name": "sinkSales"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn1"
+						},
+						{
+							"name": "derivedColumn2"
+						},
+						{
+							"name": "derivedColumn3"
+						},
+						{
+							"name": "derivedColumn4"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          MovementKey as long,",
+						"          DateKey as date,",
+						"          StockItemKey as integer,",
+						"          CustomerKey as integer,",
+						"          SupplierKey as integer,",
+						"          TransactionTypeKey as integer,",
+						"          WWIStockItemTransactionID as integer,",
+						"          WWIInvoiceID as integer,",
+						"          WWIPurchaseOrderID as integer,",
+						"          Quantity as integer,",
+						"          LineageKey as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> movement",
+						"source(output(",
+						"          OrderKey as long,",
+						"          CityKey as integer,",
+						"          CustomerKey as integer,",
+						"          StockItemKey as integer,",
+						"          OrderDateKey as date,",
+						"          PickedDateKey as date,",
+						"          SalespersonKey as integer,",
+						"          PickerKey as integer,",
+						"          WWIOrderID as integer,",
+						"          WWIBackorderID as integer,",
+						"          Description as string,",
+						"          Package as string,",
+						"          Quantity as integer,",
+						"          UnitPrice as string,",
+						"          TaxRate as string,",
+						"          TotalExcludingTax as string,",
+						"          TaxAmount as string,",
+						"          TotalIncludingTax as string,",
+						"          LineageKey as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> order",
+						"source(output(",
+						"          PurchaseKey as long,",
+						"          DateKey as date,",
+						"          SupplierKey as integer,",
+						"          StockItemKey as integer,",
+						"          WWIPurchaseOrderID as integer,",
+						"          OrderedOuters as integer,",
+						"          OrderedQuantity as integer,",
+						"          ReceivedOuters as integer,",
+						"          Package as string,",
+						"          IsOrderFinalized as boolean,",
+						"          LineageKey as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> purchase",
+						"source(output(",
+						"          Sale_Key as integer,",
+						"          City_Key as integer,",
+						"          Customer_Key as string,",
+						"          Bill_To_Customer_Key as string,",
+						"          Stock_Item_Key as string,",
+						"          Invoice_Date_Key as timestamp,",
+						"          Delivery_Date_Key as timestamp,",
+						"          Salesperson_Key as integer,",
+						"          WWI_Invoice_ID as integer,",
+						"          Description as string,",
+						"          Package as string,",
+						"          Quantity as string,",
+						"          Unit_Price as string,",
+						"          Tax_Rate as string,",
+						"          Total_Excluding_Tax as string,",
+						"          Tax_Amount as string,",
+						"          Profit as string,",
+						"          Total_Including_Tax as string,",
+						"          Total_Dry_Items as integer,",
+						"          Total_Chiller_Items as integer,",
+						"          Lineage_Key as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> sales",
+						"movement derive(Year = year(DateKey),",
+						"          Month = toString(DateKey, 'MM')) ~> derivedColumn1",
+						"order derive(Year = year(OrderDateKey),",
+						"          Month = toString(OrderDateKey,'MM')) ~> derivedColumn2",
+						"purchase derive(Year = year(DateKey),",
+						"          Month = toString(DateKey,'MM')) ~> derivedColumn3",
+						"sales derive(Year = year(Invoice_Date_Key),",
+						"          Month = toString(Invoice_Date_Key,'MM')) ~> derivedColumn4",
+						"derivedColumn1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('key',",
+						"          0,",
+						"          Year,",
+						"          Month",
+						"     )) ~> sinkMovement",
+						"derivedColumn2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('key',",
+						"          0,",
+						"          Year,",
+						"          Month",
+						"     )) ~> sinkOrder",
+						"derivedColumn3 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('key',",
+						"          0,",
+						"          Year,",
+						"          Month",
+						"     )) ~> sinkPurchase",
+						"derivedColumn4 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('key',",
+						"          0,",
+						"          Year,",
+						"          Month",
+						"     )) ~> sinkSales"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/movement_landing')]",
+				"[concat(variables('workspaceId'), '/datasets/order')]",
+				"[concat(variables('workspaceId'), '/datasets/purchase_landing')]",
+				"[concat(variables('workspaceId'), '/datasets/sales_landing')]",
+				"[concat(variables('workspaceId'), '/datasets/movement_raw')]",
+				"[concat(variables('workspaceId'), '/datasets/order_raw')]",
+				"[concat(variables('workspaceId'), '/datasets/purchase_raw')]",
+				"[concat(variables('workspaceId'), '/datasets/sales_raw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Dataflow3')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "city_raw",
+								"type": "DatasetReference"
+							},
+							"name": "city"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "adls_stlakebdv_ls",
+								"type": "LinkedServiceReference"
+							},
+							"name": "sinkCity"
+						}
+					],
+					"transformations": [],
+					"scriptLines": [
+						"source(output(",
+						"          CityKey as integer,",
+						"          WWICityID as integer,",
+						"          City as string,",
+						"          StateProvince as string,",
+						"          Country as string,",
+						"          Continent as string,",
+						"          SalesTerritory as string,",
+						"          Region as string,",
+						"          Subregion as string,",
+						"          LatestRecordedPopulation as long,",
+						"          ValidFrom as timestamp,",
+						"          ValidTo as timestamp,",
+						"          LineageKey as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     fileList: true,",
+						"     format: 'parquet') ~> city",
+						"city sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'data',",
+						"     folderPath: 'city',",
+						"     overwrite:true,",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> sinkCity"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/city_raw')]",
+				"[concat(variables('workspaceId'), '/linkedServices/adls_stlakebdv_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DCL_LAKE_CONFIG')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "CREATE DATABASE gab2023lake;\nGO\n\nUSE gab2023lake;\nGO\n\n--------------------------------------------------------------------------------------------\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'p39345ghJ#KL95909234nl0zBe'",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DDL_LAKE_CREATE_SCHEMA')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "CREATE DATABASE gab2023lake;\nGO\n\nUSE gab2023lake;\nGO\n\n--------------------------------------------------------------------------------------------\nCREATE MASTER KEY ENCRYPTION BY PASSWORD = 'p39345ghJ#KL95909234nl0zBe'\nGO\n\n--------------------------------------------------------------------------------------------\nCREATE DATABASE SCOPED CREDENTIAL LKRDVUserIdentity WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2023-12-31T13:26:04Z&st=2023-05-10T05:26:04Z&spr=https&sig=v5PCDsQYpTAMQsl19L3t2I%2FK5aqWpupTxqekpFTr7Wc%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalRDVDataSource WITH (\n    LOCATION = 'https://stlakerdvprdeastus2001.dfs.core.windows.net/',\n    CREDENTIAL = LKRDVUserIdentity\n);\nGO\n\n--------------------------------------------------------------------------------------------\n\nCREATE DATABASE SCOPED CREDENTIAL LKMDVUserIdentity WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=b&srt=sco&sp=rwdlacyx&se=2023-12-31T13:15:46Z&st=2023-05-09T05:15:46Z&spr=https&sig=C9JslkGGagjYAaGoRAhwtsVaKpCJN6R2g6SY7O2zSTw%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalMDVDataSource WITH (\n    LOCATION = 'https://stlakemdvprdeastus2001.dfs.core.windows.net/',\n    CREDENTIAL = LKMDVUserIdentity\n);\nGO\n\n--------------------------------------------------------------------------------------------\n\nCREATE DATABASE SCOPED CREDENTIAL LKBDVUserIdentityNew WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2023-12-31T13:03:27Z&st=2023-05-10T05:03:27Z&spr=https&sig=w%2BuDs2eh1WY8SUQv4aTb%2F3X7uJ8Ige%2BgIWakupA8U4M%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalBDVDataSourceNew WITH (\n    LOCATION = 'https://stlakebdvprdeastus2001.dfs.core.windows.net/',\n    CREDENTIAL = LKBDVUserIdentityNew\n);\nGO\n\nCREATE DATABASE SCOPED CREDENTIAL LKBDVUserIdentityBlob WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2023-12-31T13:03:27Z&st=2023-05-10T05:03:27Z&spr=https&sig=w%2BuDs2eh1WY8SUQv4aTb%2F3X7uJ8Ige%2BgIWakupA8U4M%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalBDVDataSourceBlob WITH (\n    LOCATION = 'https://stlakebdvprdeastus2001.blob.core.windows.net/',\n    CREDENTIAL = LKBDVUserIdentityBlob\n);\nGO\n\n--------------------------------------------------------------------------------------------\n\nCREATE EXTERNAL FILE FORMAT LKDeltaFileFormat WITH (\n    FORMAT_TYPE = DELTA\n);\nGO\n\nCREATE EXTERNAL FILE FORMAT LKParquetFileFormat \nWITH (\n    FORMAT_TYPE = PARQUET,\n    DATA_COMPRESSION = 'org.apache.hadoop.io.compress.SnappyCodec'\n);\nGO\n\n\n-----REMOVE APP--------------------------------------\nSELECT * FROM sys.sql_logins;\n-----------------------------------------------------\n\nCREATE SCHEMA rdv AUTHORIZATION dbo;\nGO\n\nCREATE SCHEMA mdv AUTHORIZATION dbo;\nGO\n\nCREATE SCHEMA bdv AUTHORIZATION dbo;\nGO\n\nCREATE SCHEMA sdv AUTHORIZATION dbo;\nGO",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "gab2023lake",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DDL_LAKE_CREATE_TABLE')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "-----------------------------------------------------\n---RAW ZONE:\n-----------------------------------------------------\nCREATE EXTERNAL TABLE rdv.d365fop_city(\n    [CityKey] [int],\n\t[WWICityID] [int],\n\t[City] [nvarchar](50),\n\t[StateProvince] [nvarchar](50),\n\t[Country] [nvarchar](60),\n\t[Continent] [nvarchar](30),\n\t[SalesTerritory] [nvarchar](50),\n\t[Region] [nvarchar](30),\n\t[Subregion] [nvarchar](30),\n\t[LatestRecordedPopulation] [bigint],\n\t[ValidFrom] [datetime2](7),\n\t[ValidTo] [datetime2](7),\n\t[LineageKey] [int]\n) WITH (\n    LOCATION = '/data/city/city.parquet',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = UPParquetFileFormat\n);\nGO\n\n------------------------------------------------------------------------\nSELECT TOP(10) * \nFROM rdv.d365fop_city;\nGO\n------------------------------------------------------------------------\n\nCREATE EXTERNAL TABLE rdv.d365fop_movement(\n\t[MovementKey] [bigint],\n\t[DateKey] [date],\n\t[StockItemKey] [int],\n\t[CustomerKey] [int],\n\t[SupplierKey] [int],\n\t[TransactionTypeKey] [int],\n\t[WWIStockItemTransactionID] [int],\n\t[WWIInvoiceID] [int],\n\t[WWIPurchaseOrderID] [int],\n\t[Quantity] [int],\n\t[LineageKey] [int],\n\t[year] [nvarchar](4),\n\t[month] [nvarchar](2),\n\t[day] [nvarchar] (2)\n) WITH (\n    LOCATION = '/data/movement/year=*/month=*/day=*/*.parquet',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = UPParquetFileFormat\n);\nGO\n\n--------------------------------------------------------------------------------------\nSELECT TOP(10) * \nFROM rdv.d365fop_movement2 a\nWHERE a.Year='2013' and a.Month='01'\nGO\n--------------------------------------------------------------------------------------\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n------------------------------------------------------------------------\n\nCREATE EXTERNAL TABLE rdv.d365fop_customer (\n    [CustomerKey] [int] NOT NULL,\n\t[WWICustomerID] [int] NOT NULL,\n\t[Customer] [nvarchar](100) NOT NULL,\n\t[BillToCustomer] [nvarchar](100) NOT NULL,\n\t[Category] [nvarchar](50) NOT NULL,\n\t[BuyingGroup] [nvarchar](50) NOT NULL,\n\t[PrimaryContact] [nvarchar](50) NOT NULL,\n\t[PostalCode] [nvarchar](10) NOT NULL,\n\t[ValidFrom] [datetime2](7) NOT NULL,\n\t[ValidTo] [datetime2](7) NOT NULL,\n\t[LineageKey] [int] NOT NULL\n) WITH (\n    LOCATION = '/data/customer/',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = LKDeltaFileFormat\n);\n\nCREATE EXTERNAL TABLE rdv.d365fop_employee (\n    [EmployeeKey] [int] NOT NULL,\n\t[WWIEmployeeID] [int] NOT NULL,\n\t[Employee] [nvarchar](50) NOT NULL,\n\t[PreferredName] [nvarchar](50) NOT NULL,\n\t[IsSalesperson] [bit] NOT NULL,\n\t[ValidFrom] [datetime2](7) NOT NULL,\n\t[ValidTo] [datetime2](7) NOT NULL,\n\t[LineageKey] [int] NOT NULL\n) WITH (\n    LOCATION = '/data/employee/',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = LKDeltaFileFormat\n);\n\nCREATE EXTERNAL TABLE rdv.d365fop_paymentmethod (\n\t[PaymentMethodKey] [int] NOT NULL,\n\t[WWIPaymentMethodID] [int] NOT NULL,\n\t[PaymentMethod] [nvarchar](50) NOT NULL,\n\t[ValidFrom] [datetime2](7) NOT NULL,\n\t[ValidTo] [datetime2](7) NOT NULL,\n\t[LineageKey] [int] NOT NULL\n) WITH (\n    LOCATION = '/data/paymentmethod/',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = LKDeltaFileFormat\n);\n\nCREATE EXTERNAL TABLE rdv.d365fop_stockitem (\n\t[StockItemKey] [int] NOT NULL,\n\t[WWIStockItemID] [int] NOT NULL,\n\t[Stock Item] [nvarchar](100) NOT NULL,\n\t[Color] [nvarchar](20) NOT NULL,\n\t[SellingPackage] [nvarchar](50) NOT NULL,\n\t[Buying Package] [nvarchar](50) NOT NULL,\n\t[Brand] [nvarchar](50) NOT NULL,\n\t[Size] [nvarchar](20) NOT NULL,\n\t[LeadTimeDays] [int] NOT NULL,\n\t[QuantityPerOuter] [int] NOT NULL,\n\t[IsChillerStock] [bit] NOT NULL,\n\t[Barcode] [nvarchar](50) NULL,\n\t[TaxRate] [decimal](18, 3) NOT NULL,\n\t[UnitPrice] [decimal](18, 2) NOT NULL,\n\t[RecommendedRetailPrice] [decimal](18, 2) NULL,\n\t[TypicalWeightPerUnit] [decimal](18, 3) NOT NULL,\n\t[ValidFrom] [datetime2](7) NOT NULL,\n\t[ValidTo] [datetime2](7) NOT NULL,\n\t[LineageKey] [int] NOT NULL\n) WITH (\n    LOCATION = '/data/sotckitem/',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = LKDeltaFileFormat\n);\n\nCREATE EXTERNAL TABLE rdv.d365fop_supplier (\n    [SupplierKey] [int] NOT NULL,\n\t[WWISupplierID] [int] NOT NULL,\n\t[Supplier] [nvarchar](100) NOT NULL,\n\t[Category] [nvarchar](50) NOT NULL,\n\t[PrimaryContact] [nvarchar](50) NOT NULL,\n\t[SupplierReference] [nvarchar](20) NULL,\n\t[PaymentDays] [int] NOT NULL,\n\t[PostalCode] [nvarchar](10) NOT NULL,\n\t[ValidFrom] [datetime2](7) NOT NULL,\n\t[ValidTo] [datetime2](7) NOT NULL,\n\t[LineageKey] [int] NOT NULL\n) WITH (\n    LOCATION = '/data/supplier/',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = LKDeltaFileFormat\n);\n\n\n\n\n\n\n\n\n\n\n-----------------------------------------------------",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "gab2023lake",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DDL_LAKE_OPERATION_MODEL')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "\nUSE gab2023lake;\nGO\n\nCREATE SCHEMA ms AUTHORIZATION dbo;\nGO\n----------------------------------------------------------------------------------------------------------\nCREATE DATABASE SCOPED CREDENTIAL LKMSUserIdentity WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2023-12-31T16:46:54Z&st=2023-05-10T08:46:54Z&spr=https&sig=H%2FXXBydhN0u5td25VbhtPdGV5B1DDM9000fHDPCqRwM%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalMSDataSource WITH (\n    LOCATION = 'https://stlakemsprdeastus2001.dfs.core.windows.net/',\n    CREDENTIAL = LKMSUserIdentity\n);\nGO\n----------------------------------------------------------------------------------------------------------\nIF NOT EXISTS ( SELECT * FROM sys.external_tables WHERE object_id = OBJECT_ID('ope.ObjectCatalog') )\nCREATE EXTERNAL TABLE ms.ObjectCatalog (\n    [Id] [UNIQUEIDENTIFIER],\n    [Name] [NVARCHAR](50),\n    [ZoneName] [NVARCHAR] (20),\n    [Type] [NVARCHAR] (10),\n    [CreationUser] [NVARCHAR](20),\n    [CreationDate] [DATETIME2](7)\n) WITH (\n    LOCATION = '/operation/ObjectCatalog/*.parquet',\n    DATA_SOURCE = ExternalMSDataSource,\n    FILE_FORMAT = LKParquetFileFormat\n);\nGO\n----------------------------------------------------------------------------------------------------------\nIF NOT EXISTS ( SELECT * FROM sys.external_tables WHERE object_id = OBJECT_ID('ope.ProcessMetadata') )\nCREATE EXTERNAL TABLE ms.ProcessMetadata (\n    [Id] [UNIQUEIDENTIFIER],\n    [ExecId] [UNIQUEIDENTIFIER],\n    [ExecDate] [DATETIME2](7),\n    [ZoneName] [NVARCHAR](20),\n    [ProcessName] [NVARCHAR](50),\n    [InTableName] [NVARCHAR](100),\n    [OutTableName] [NVARCHAR](100),\n    [OutTableName] [NVARCHAR](100),\n    [ExecStartDate] [DATETIME2](7),\n    [ExecEndDate] [DATETIME2](7),\n    [ExecStatus] [NVARCHAR](20),\n    [ExecRowRead] [INT],\n    [ExecRowWrite] [INT],\n    [CreationUser] [NVARCHAR](20),\n    [CreationDate] [DATETIME2](7)\n) WITH (\n    LOCATION = '/operation/ProcessMetadata/Year=*/*.parquet',\n    DATA_SOURCE = ExternalMSDataSource,\n    FILE_FORMAT = LKParquetFileFormat\n);\nGO\n\nIF NOT EXISTS ( SELECT * FROM sys.external_tables WHERE object_id = OBJECT_ID('ope.QualityMeasures') )\nCREATE EXTERNAL TABLE ms.QualityMeasures (\n    [Id] [UNIQUEIDENTIFIER],\n    [ResourceName] [NVARCHAR](50),\n    [FieldName] [NVARCHAR](50),\n    [MetricName] [NVARCHAR](50),\n    [Measurement] [FLOAT](50),\n    [Value] [NVARCHAR] (100),\n    [Annotation] [NVARCHAR] (100),\n    [LoadDate] [DATETIME2](7),\n    [UpdatedUser] [NVARCHAR](50),\n    [ReviewUser] [NVARCHAR](50) \n) WITH (\n    LOCATION = '/quality/QualityMeasures/Year=*/*.parquet',\n    DATA_SOURCE = ExternalMSDataSource,\n    FILE_FORMAT = LKParquetFileFormat\n);\nGO\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DQL_LAKE_CREATE_TABLE')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "USE gab2023lake;\nGO\n\n--Transacional con particion\nCREATE EXTERNAL TABLE rdv.dimcity(\n    City NVARCHAR(100)\n) WITH (\n    LOCATION = '/data/city/city.parquet',\n    DATA_SOURCE = ExternalRDVDataSource,\n    FILE_FORMAT = UPParquetFileFormat\n);\nGO\n\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "gab2023lake",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Metadata_Synapse_Serverless')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "USE gab2023lake;\nGO\n\nSELECT * FROM sys.all_columns\n\nSELECT * FROM INFORMATION_SCHEMA.TABLES;\n\nSELECT * FROM INFORMATION_SCHEMA.VIEWS;\n\nSELECT * FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE;\n\nSELECT * FROM INFORMATION_SCHEMA.SCHEMATA;\n\nSELECT * FROM sys.credentials;\nSELECT * FROM sys.database_credentials;\nSELECT * FROM sys.database_query_store_options;\n\n\nSELECT * FROM sys.all_views ORDER BY name DESC;\n\nSELECT * FROM sys.stats_columns\nOPTION (LABEL = 'My Query');\n\nSELECT TOP 10 *\nFROM sys.dm_pdw_exec_requests\nORDER BY total_elapsed_time DESC;\n\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "gab2023lake",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'data/date/date.parquet',\n        DATA_SOURCE ='ExternalRDVDataSource',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n\nSELECT * FROM sys.dm_exec_connections \nSELECT * FROM sys.dm_exec_sessions \nSELECT * FROM sys.dm_exec_requests",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "gab2023lake",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Notebook 2')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "SparkPool001",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "56g",
+					"driverCores": 8,
+					"executorMemory": "56g",
+					"executorCores": 8,
+					"numExecutors": 2,
+					"runAsWorkspaceSystemIdentity": false,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "7f26c18d-1efe-472a-9776-10852d4c7ae8"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"synapse_widget": {
+						"version": "0.1",
+						"state": {
+							"b58d9519-a5bc-4892-bf4a-62c85acb9f0c": {
+								"type": "Synapse.DataFrame",
+								"sync_state": {
+									"table": {
+										"rows": [
+											{
+												"0": "0",
+												"1": "0",
+												"2": "Unknown",
+												"3": "N/A",
+												"4": "N/A",
+												"5": "N/A",
+												"6": "N/A",
+												"7": "N/A",
+												"8": "N/A",
+												"9": "0",
+												"10": "2013-01-01 00:00:00",
+												"11": "9999-12-31 23:59:59.999999",
+												"12": "0"
+											},
+											{
+												"0": "1",
+												"1": "5450",
+												"2": "Carrollton",
+												"3": "New York",
+												"4": "United States",
+												"5": "North America",
+												"6": "Mideast",
+												"7": "Americas",
+												"8": "Northern America",
+												"9": "0",
+												"10": "2013-01-01 00:00:00",
+												"11": "2013-01-01 00:02:00",
+												"12": "1"
+											},
+											{
+												"0": "2",
+												"1": "5451",
+												"2": "Carrollton",
+												"3": "Virginia",
+												"4": "United States",
+												"5": "North America",
+												"6": "Southeast",
+												"7": "Americas",
+												"8": "Northern America",
+												"9": "4574",
+												"10": "2013-01-01 00:00:00",
+												"11": "2013-01-01 00:03:00",
+												"12": "1"
+											},
+											{
+												"0": "3",
+												"1": "5452",
+												"2": "Carrollton",
+												"3": "Illinois",
+												"4": "United States",
+												"5": "North America",
+												"6": "Great Lakes",
+												"7": "Americas",
+												"8": "Northern America",
+												"9": "2484",
+												"10": "2013-01-01 00:00:00",
+												"11": "2013-01-01 00:05:00",
+												"12": "1"
+											},
+											{
+												"0": "4",
+												"1": "5453",
+												"2": "Carrollton",
+												"3": "Missouri",
+												"4": "United States",
+												"5": "North America",
+												"6": "Plains",
+												"7": "Americas",
+												"8": "Northern America",
+												"9": "3784",
+												"10": "2013-01-01 00:00:00",
+												"11": "2013-01-01 00:03:00",
+												"12": "1"
+											},
+											{
+												"0": "5",
+												"1": "5454",
+												"2": "Carrollton",
+												"3": "Ohio",
+												"4": "United States",
+												"5": "North America",
+												"6": "Great Lakes",
+												"7": "Americas",
+												"8": "Northern America",
+												"9": "3241",
+												"10": "2013-01-01 00:00:00",
+												"11": "2013-01-01 00:04:00",
+												"12": "1"
+											},
+											{
+												"0": "6",
+												"1": "5455",
+												"2": "Carrollton",
+												"3": "Kentucky",
+												"4": "United States",
+												"5": "North America",
+												"6": "Southeast",
+												"7": "Americas",
+												"8": "Northern America",
+												"9": "3938",
+												"10": "2013-01-01 00:00:00",
+												"11": "2013-01-01 00:05:00",
+												"12": "1"
+											},
+											{
+												"0": "7",
+												"1": "5456",
+												"2": "Carrollton",
+												"3": "Georgia",
+												"4": "United States",
+												"5": "North America",
+												"6": "Southeast",
+												"7": "Americas",
+												"8": "Northern America",
+												"9": "24388",
+												"10": "2013-01-01 00:00:00",
+												"11": "2013-01-01 00:02:00",
+												"12": "1"
+											},
+											{
+												"0": "8",
+												"1": "5457",
+												"2": "Carrollton",
+												"3": "Alabama",
+												"4": "United States",
+												"5": "North America",
+												"6": "Southeast",
+												"7": "Americas",
+												"8": "Northern America",
+												"9": "1019",
+												"10": "2013-01-01 00:00:00",
+												"11": "2013-01-01 00:01:00",
+												"12": "1"
+											},
+											{
+												"0": "9",
+												"1": "5458",
+												"2": "Carrollton",
+												"3": "Mississippi",
+												"4": "United States",
+												"5": "North America",
+												"6": "Southeast",
+												"7": "Americas",
+												"8": "Northern America",
+												"9": "190",
+												"10": "2013-01-01 00:00:00",
+												"11": "2013-01-01 00:04:00",
+												"12": "1"
+											}
+										],
+										"schema": [
+											{
+												"key": "0",
+												"name": "CityKey",
+												"type": "int"
+											},
+											{
+												"key": "1",
+												"name": "WWICityID",
+												"type": "int"
+											},
+											{
+												"key": "2",
+												"name": "City",
+												"type": "string"
+											},
+											{
+												"key": "3",
+												"name": "StateProvince",
+												"type": "string"
+											},
+											{
+												"key": "4",
+												"name": "Country",
+												"type": "string"
+											},
+											{
+												"key": "5",
+												"name": "Continent",
+												"type": "string"
+											},
+											{
+												"key": "6",
+												"name": "SalesTerritory",
+												"type": "string"
+											},
+											{
+												"key": "7",
+												"name": "Region",
+												"type": "string"
+											},
+											{
+												"key": "8",
+												"name": "Subregion",
+												"type": "string"
+											},
+											{
+												"key": "9",
+												"name": "LatestRecordedPopulation",
+												"type": "bigint"
+											},
+											{
+												"key": "10",
+												"name": "ValidFrom",
+												"type": "timestamp"
+											},
+											{
+												"key": "11",
+												"name": "ValidTo",
+												"type": "timestamp"
+											},
+											{
+												"key": "12",
+												"name": "LineageKey",
+												"type": "int"
+											}
+										],
+										"truncated": false
+									},
+									"isSummary": false,
+									"language": "scala"
+								},
+								"persist_state": {
+									"view": {
+										"type": "details",
+										"chartOptions": {
+											"chartType": "bar",
+											"aggregationType": "sum",
+											"categoryFieldKeys": [
+												"1"
+											],
+											"seriesFieldKeys": [
+												"0"
+											],
+											"isStacked": false
+										}
+									}
+								}
+							}
+						}
+					},
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/af9c01d6-5edb-4165-8a7b-093ce5571c12/resourceGroups/rg-gab2023-prod-001/providers/Microsoft.Synapse/workspaces/synw-gab2023-prod-eastus2-001/bigDataPools/SparkPool001",
+						"name": "SparkPool001",
+						"type": "Spark",
+						"endpoint": "https://synw-gab2023-prod-eastus2-001.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/SparkPool001",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net",
+							"authHeader": null
+						},
+						"sparkVersion": "3.3",
+						"nodeCount": 10,
+						"cores": 8,
+						"memory": 56,
+						"extraHeader": null
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"from pyspark.sql import SparkSession\r\n",
+							"account_name = 'stlakerdvprdeastus2001'\r\n",
+							"container_name = 'data'\r\n",
+							"relative_path = 'city'\r\n",
+							"linked_service_name = 'adls_stlakerdv_ls'\r\n",
+							"\r\n",
+							"sas_token = mssparkutils.credentials.getConnectionStringOrCreds(linked_service_name)"
+						],
+						"outputs": [],
+						"execution_count": 1
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"#path = 'abfss://%s@%s.dfs.core.windows.net/%s' % (container_name,account_name,relative_path)   \r\n",
+							"path = 'wasbs://%s@%s.blob.core.windows.net/%s' % (container_name, account_name, relative_path)\r\n",
+							"\r\n",
+							"spark.conf.set('fs.azure.sas.%s.%s.blob.core.windows.net' % (container_name,account_name),sas_token)\r\n",
+							"  \r\n",
+							"print('Remote blob path: ' + path)"
+						],
+						"outputs": [],
+						"execution_count": 2
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"collapsed": false
+						},
+						"source": [
+							"df = spark.read.load(path, format='parquet')\r\n",
+							"display(df.limit(10))"
+						],
+						"outputs": [],
+						"execution_count": 3
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							""
+						],
+						"outputs": []
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {},
+			"dependsOn": []
+		}
+	]
+}
