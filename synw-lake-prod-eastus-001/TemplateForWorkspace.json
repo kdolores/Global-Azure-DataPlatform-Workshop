@@ -82,7 +82,7 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "Lookup1",
+						"name": "LookupDim",
 						"type": "Lookup",
 						"dependsOn": [],
 						"policy": {
@@ -106,7 +106,7 @@
 								}
 							},
 							"dataset": {
-								"referenceName": "maestros_csv",
+								"referenceName": "maestros_business_csv",
 								"type": "DatasetReference",
 								"parameters": {}
 							},
@@ -118,7 +118,7 @@
 						"type": "ForEach",
 						"dependsOn": [
 							{
-								"activity": "Lookup1",
+								"activity": "LookupDim",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -127,12 +127,12 @@
 						"userProperties": [],
 						"typeProperties": {
 							"items": {
-								"value": "@activity('Lookup1').output.value",
+								"value": "@activity('LookupDim').output.value",
 								"type": "Expression"
 							},
 							"activities": [
 								{
-									"name": "Notebook1",
+									"name": "business_dim_notebook",
 									"type": "SynapseNotebook",
 									"dependsOn": [],
 									"policy": {
@@ -155,6 +155,17 @@
 													"type": "Expression"
 												},
 												"type": "string"
+											},
+											"loadDate": {
+												"value": {
+													"value": "@utcnow()",
+													"type": "Expression"
+												},
+												"type": "string"
+											},
+											"creationUser": {
+												"value": "keyla.doloresmendez@outlook.com",
+												"type": "string"
 											}
 										},
 										"snapshot": true,
@@ -171,6 +182,151 @@
 										"driverSize": "Small",
 										"numExecutors": null
 									}
+								},
+								{
+									"name": "Set variable1",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "business_dim_notebook",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "NotebookOutput",
+										"value": {
+											"value": "@activity('business_dim_notebook').output.status.Output.result.exitValue",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "LookupTrx",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "trx_business_csv",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach2",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LookupTrx",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LookupTrx').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "business_trx_notebook",
+									"type": "SynapseNotebook",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebook": {
+											"referenceName": "business_trx_notebook",
+											"type": "NotebookReference"
+										},
+										"parameters": {
+											"relative_path": {
+												"value": {
+													"value": "@item().Prop_0",
+													"type": "Expression"
+												},
+												"type": "string"
+											},
+											"loadDate": {
+												"value": {
+													"value": "@utcnow()",
+													"type": "Expression"
+												},
+												"type": "string"
+											},
+											"creationUser": {
+												"value": "keyla.doloresmendez@outlook.com",
+												"type": "string"
+											}
+										},
+										"snapshot": true,
+										"sparkPool": {
+											"referenceName": "SparkPool",
+											"type": "BigDataPoolReference"
+										},
+										"executorSize": "Small",
+										"conf": {
+											"spark.dynamicAllocation.enabled": null,
+											"spark.dynamicAllocation.minExecutors": null,
+											"spark.dynamicAllocation.maxExecutors": null
+										},
+										"driverSize": "Small",
+										"numExecutors": null
+									}
+								},
+								{
+									"name": "Set variable1_copy1",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "business_trx_notebook",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "NotebookOutput",
+										"value": {
+											"value": "@activity('business_trx_notebook').output.status.Output.result.exitValue",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}
@@ -180,13 +336,20 @@
 					"elapsedTimeMetric": {},
 					"cancelAfter": {}
 				},
+				"variables": {
+					"NotebookOutput": {
+						"type": "String"
+					}
+				},
 				"annotations": [],
 				"lastPublishTime": "2023-05-10T06:54:58Z"
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/datasets/maestros_csv')]",
+				"[concat(variables('workspaceId'), '/datasets/maestros_business_csv')]",
+				"[concat(variables('workspaceId'), '/datasets/trx_business_csv')]",
 				"[concat(variables('workspaceId'), '/notebooks/business_dim_notebook')]",
-				"[concat(variables('workspaceId'), '/bigDataPools/SparkPool')]"
+				"[concat(variables('workspaceId'), '/bigDataPools/SparkPool')]",
+				"[concat(variables('workspaceId'), '/notebooks/business_trx_notebook')]"
 			]
 		},
 		{
@@ -742,6 +905,37 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/linkedServices/adls_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/maestros_business_csv')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_stlakerdv_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "maestros.csv",
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_stlakerdv_ls')]"
 			]
 		},
 		{
@@ -1321,6 +1515,37 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/linkedServices/adls_std365fop_ls')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/trx_business_csv')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "adls_stlakerdv_ls",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "transaccionales.csv",
+						"fileSystem": "raw"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/adls_stlakerdv_ls')]"
 			]
 		},
 		{
@@ -2172,7 +2397,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "ca6c946d-113d-42f7-afe8-77d58b08df89"
+						"spark.autotune.trackingId": "9238d076-dba0-44c0-824d-386321712826"
 					}
 				},
 				"metadata": {
@@ -2197,12 +2422,35 @@
 						"sparkVersion": "3.3",
 						"nodeCount": 3,
 						"cores": 4,
-						"memory": 28,
-						"automaticScaleJobs": false
+						"memory": 28
 					},
 					"sessionKeepAliveTimeout": 30
 				},
 				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"tags": [
+								"parameters"
+							]
+						},
+						"source": [
+							"relative_path = \"\"\r\n",
+							"loadDate = \"\"\r\n",
+							"creationUser = \"\""
+						],
+						"outputs": [],
+						"execution_count": 4
+					},
 					{
 						"cell_type": "code",
 						"metadata": {
@@ -2221,20 +2469,20 @@
 							" from pyspark.sql import SparkSession\r\n",
 							"source_account_name = 'stlakerdvprdeastus001'\r\n",
 							"source_container_name = 'raw'\r\n",
-							"source_relative_path = 'order'\r\n",
+							"source_relative_path = {relative_path}\r\n",
 							"source_linked_service_name = 'adls_stlakerdv_ls'\r\n",
 							"\r\n",
 							"source_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(source_linked_service_name)\r\n",
 							"\r\n",
 							"sync_account_name = 'stlakebdvprdeastus001'\r\n",
 							"sync_container_name = 'comercial'\r\n",
-							"sync_relative_path = 'fact' + \r\n",
+							"sync_relative_path = 'dim' + {relative_path}\r\n",
 							"sync_linked_service_name = 'adls_stlakebdv_ls'\r\n",
 							"\r\n",
 							"sync_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(sync_linked_service_name)"
 						],
 						"outputs": [],
-						"execution_count": 14
+						"execution_count": 2
 					},
 					{
 						"cell_type": "code",
@@ -2320,7 +2568,12 @@
 						"source": [
 							"# Save the dataframe as a delta table\r\n",
 							"\r\n",
-							"df.write.mode(\"overwrite\").format(\"delta\").save(path2)\r\n",
+							"df.write. \\\r\n",
+							"    .withColumn(\"LoadDate\" ,{loadDate}) \\\r\n",
+							"    .withColumn(\"CreationUser\" ,{creationUser}) \\\r\n",
+							"    .mode(\"overwrite\") \\\r\n",
+							"    .format(\"delta\") \\\r\n",
+							"    .save(path2)\r\n",
 							"\r\n",
 							""
 						],
@@ -2353,7 +2606,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "51ad3f3a-e284-457d-8b0e-9357bbdf9e35"
+						"spark.autotune.trackingId": "0af44284-936f-4e48-b6e2-068907a2feb8"
 					}
 				},
 				"metadata": {
@@ -2378,11 +2631,36 @@
 						"sparkVersion": "3.3",
 						"nodeCount": 3,
 						"cores": 4,
-						"memory": 28
+						"memory": 28,
+						"automaticScaleJobs": false
 					},
 					"sessionKeepAliveTimeout": 30
 				},
 				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"tags": [
+								"parameters"
+							]
+						},
+						"source": [
+							"relative_path = \"\"\r\n",
+							"loadDate = \"\"\r\n",
+							"creationUser = \"\""
+						],
+						"outputs": [],
+						"execution_count": null
+					},
 					{
 						"cell_type": "code",
 						"metadata": {
@@ -2401,14 +2679,14 @@
 							" from pyspark.sql import SparkSession\r\n",
 							"source_account_name = 'stlakerdvprdeastus001'\r\n",
 							"source_container_name = 'raw'\r\n",
-							"source_relative_path = 'order'\r\n",
+							"source_relative_path = {relative_path}\r\n",
 							"source_linked_service_name = 'adls_stlakerdv_ls'\r\n",
 							"\r\n",
 							"source_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(source_linked_service_name)\r\n",
 							"\r\n",
 							"sync_account_name = 'stlakebdvprdeastus001'\r\n",
 							"sync_container_name = 'comercial'\r\n",
-							"sync_relative_path = 'factorder'\r\n",
+							"sync_relative_path = 'fact' + {relative_path}\r\n",
 							"sync_linked_service_name = 'adls_stlakebdv_ls'\r\n",
 							"\r\n",
 							"sync_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(sync_linked_service_name)"
@@ -2501,6 +2779,8 @@
 							"# Save the dataframe as a delta table\r\n",
 							"\r\n",
 							"df.write.partitionBy(\"Year\", \"Month\") \\\r\n",
+							"    .withColumn(\"LoadDate\" ,{loadDate}) \\\r\n",
+							"    .withColumn(\"CreationUser\" ,{creationUser}) \\\r\n",
 							"    .mode(\"overwrite\") \\\r\n",
 							"    .format(\"delta\") \\\r\n",
 							"    .save(path2)"
