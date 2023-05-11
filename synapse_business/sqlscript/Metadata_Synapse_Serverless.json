@@ -1,0 +1,17 @@
+{
+	"name": "Metadata_Synapse_Serverless",
+	"properties": {
+		"content": {
+			"query": "USE gab2023lake;\nGO\n\nSELECT * FROM sys.all_columns\n\nSELECT * FROM INFORMATION_SCHEMA.TABLES;\n\nSELECT * FROM INFORMATION_SCHEMA.VIEWS;\n\nSELECT * FROM INFORMATION_SCHEMA.VIEW_TABLE_USAGE;\n\nSELECT * FROM INFORMATION_SCHEMA.SCHEMATA;\n\nSELECT * FROM sys.credentials;\nSELECT * FROM sys.database_credentials;\nSELECT * FROM sys.database_query_store_options;\n\n\nSELECT * FROM sys.all_views ORDER BY name DESC;\n\nSELECT * FROM sys.stats_columns\nOPTION (LABEL = 'My Query');\n\nSELECT TOP 10 *\nFROM sys.dm_pdw_exec_requests\nORDER BY total_elapsed_time DESC;\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

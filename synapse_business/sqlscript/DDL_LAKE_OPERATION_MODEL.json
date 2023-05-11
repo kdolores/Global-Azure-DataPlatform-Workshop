@@ -1,0 +1,17 @@
+{
+	"name": "DDL_LAKE_OPERATION_MODEL",
+	"properties": {
+		"content": {
+			"query": "\nUSE gab2023lake;\nGO\n\nCREATE SCHEMA ms AUTHORIZATION dbo;\nGO\n----------------------------------------------------------------------------------------------------------\nCREATE DATABASE SCOPED CREDENTIAL LKMSUserIdentity WITH IDENTITY = 'SHARED ACCESS SIGNATURE',\nSECRET = '?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupyx&se=2023-12-31T16:46:54Z&st=2023-05-10T08:46:54Z&spr=https&sig=H%2FXXBydhN0u5td25VbhtPdGV5B1DDM9000fHDPCqRwM%3D'\n\nCREATE EXTERNAL DATA SOURCE ExternalMSDataSource WITH (\n    LOCATION = 'https://stlakemsprdeastus2001.dfs.core.windows.net/',\n    CREDENTIAL = LKMSUserIdentity\n);\nGO\n----------------------------------------------------------------------------------------------------------\nIF NOT EXISTS ( SELECT * FROM sys.external_tables WHERE object_id = OBJECT_ID('ope.ObjectCatalog') )\nCREATE EXTERNAL TABLE ms.ObjectCatalog (\n    [Id] [UNIQUEIDENTIFIER],\n    [Name] [NVARCHAR](50),\n    [ZoneName] [NVARCHAR] (20),\n    [Type] [NVARCHAR] (10),\n    [CreationUser] [NVARCHAR](20),\n    [CreationDate] [DATETIME2](7)\n) WITH (\n    LOCATION = '/operation/ObjectCatalog/*.parquet',\n    DATA_SOURCE = ExternalMSDataSource,\n    FILE_FORMAT = LKParquetFileFormat\n);\nGO\n----------------------------------------------------------------------------------------------------------\nIF NOT EXISTS ( SELECT * FROM sys.external_tables WHERE object_id = OBJECT_ID('ope.ProcessMetadata') )\nCREATE EXTERNAL TABLE ms.ProcessMetadata (\n    [Id] [UNIQUEIDENTIFIER],\n    [ExecId] [UNIQUEIDENTIFIER],\n    [ExecDate] [DATETIME2](7),\n    [ZoneName] [NVARCHAR](20),\n    [ProcessName] [NVARCHAR](50),\n    [InTableName] [NVARCHAR](100),\n    [OutTableName] [NVARCHAR](100),\n    [OutTableName] [NVARCHAR](100),\n    [ExecStartDate] [DATETIME2](7),\n    [ExecEndDate] [DATETIME2](7),\n    [ExecStatus] [NVARCHAR](20),\n    [ExecRowRead] [INT],\n    [ExecRowWrite] [INT],\n    [CreationUser] [NVARCHAR](20),\n    [CreationDate] [DATETIME2](7)\n) WITH (\n    LOCATION = '/operation/ProcessMetadata/Year=*/*.parquet',\n    DATA_SOURCE = ExternalMSDataSource,\n    FILE_FORMAT = LKParquetFileFormat\n);\nGO\n\nIF NOT EXISTS ( SELECT * FROM sys.external_tables WHERE object_id = OBJECT_ID('ope.QualityMeasures') )\nCREATE EXTERNAL TABLE ms.QualityMeasures (\n    [Id] [UNIQUEIDENTIFIER],\n    [ResourceName] [NVARCHAR](50),\n    [FieldName] [NVARCHAR](50),\n    [MetricName] [NVARCHAR](50),\n    [Measurement] [FLOAT](50),\n    [Value] [NVARCHAR] (100),\n    [Annotation] [NVARCHAR] (100),\n    [LoadDate] [DATETIME2](7),\n    [UpdatedUser] [NVARCHAR](50),\n    [ReviewUser] [NVARCHAR](50) \n) WITH (\n    LOCATION = '/quality/QualityMeasures/Year=*/*.parquet',\n    DATA_SOURCE = ExternalMSDataSource,\n    FILE_FORMAT = LKParquetFileFormat\n);\nGO\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

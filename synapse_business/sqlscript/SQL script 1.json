@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "-- This is auto-generated code\nSELECT\n    TOP 100 *\nFROM\n    OPENROWSET(\n        BULK 'data/date/date.parquet',\n        DATA_SOURCE ='ExternalRDVDataSource',\n        FORMAT = 'PARQUET'\n    ) AS [result]\n\nSELECT * FROM sys.dm_exec_connections \nSELECT * FROM sys.dm_exec_sessions \nSELECT * FROM sys.dm_exec_requests",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "master",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
