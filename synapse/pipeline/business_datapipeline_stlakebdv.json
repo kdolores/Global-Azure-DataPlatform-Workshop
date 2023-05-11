@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Lookup1",
+				"name": "LookupDim",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -38,7 +38,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Lookup1",
+						"activity": "LookupDim",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -52,7 +52,7 @@
 					},
 					"activities": [
 						{
-							"name": "Notebook1",
+							"name": "business_dim_notebook",
 							"type": "SynapseNotebook",
 							"dependsOn": [],
 							"policy": {
@@ -83,13 +83,157 @@
 									"type": "BigDataPoolReference"
 								},
 								"executorSize": "Small",
-								"driverSize": "Small"
+								"conf": {
+									"spark.dynamicAllocation.enabled": null,
+									"spark.dynamicAllocation.minExecutors": null,
+									"spark.dynamicAllocation.maxExecutors": null
+								},
+								"driverSize": "Small",
+								"numExecutors": null
+							}
+						},
+						{
+							"name": "Set variable1",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "business_dim_notebook",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "NotebookOutput",
+								"value": {
+									"value": "@activity('business_dim_notebook').output.status.Output.result.exitValue",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "LookupTrx",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "maestros_csv",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach2",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LookupTrx",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup1').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "business_trx_notebook",
+							"type": "SynapseNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebook": {
+									"referenceName": "business_trx_notebook",
+									"type": "NotebookReference"
+								},
+								"parameters": {
+									"relative_path": {
+										"value": {
+											"value": "@item().Prop_0",
+											"type": "Expression"
+										},
+										"type": "string"
+									}
+								},
+								"snapshot": true,
+								"sparkPool": {
+									"referenceName": "SparkPool",
+									"type": "BigDataPoolReference"
+								},
+								"executorSize": "Small",
+								"conf": {
+									"spark.dynamicAllocation.enabled": null,
+									"spark.dynamicAllocation.minExecutors": null,
+									"spark.dynamicAllocation.maxExecutors": null
+								},
+								"driverSize": "Small",
+								"numExecutors": null
+							}
+						},
+						{
+							"name": "Set variable1_copy1",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "business_trx_notebook",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "NotebookOutput",
+								"value": {
+									"value": "@activity('business_trx_notebook').output.status.Output.result.exitValue",
+									"type": "Expression"
+								}
 							}
 						}
 					]
 				}
 			}
 		],
+		"variables": {
+			"NotebookOutput": {
+				"type": "String"
+			}
+		},
 		"annotations": [],
 		"lastPublishTime": "2023-05-10T06:54:58Z"
 	},

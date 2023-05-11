@@ -18,7 +18,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "2d178bf1-afdf-42ec-93cf-966fc0cbbd24"
+				"spark.autotune.trackingId": "39e17503-883c-4f61-95ae-942e87dd0dd2"
 			}
 		},
 		"metadata": {
@@ -60,6 +60,27 @@
 						"transient": {
 							"deleting": false
 						}
+					},
+					"tags": [
+						"parameters"
+					]
+				},
+				"source": [
+					"relative_path = \"\""
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
 					}
 				},
 				"source": [
@@ -67,19 +88,19 @@
 					" from pyspark.sql import SparkSession\r\n",
 					"source_account_name = 'stlakerdvprdeastus001'\r\n",
 					"source_container_name = 'raw'\r\n",
-					"source_relative_path = 'order'\r\n",
+					"source_relative_path = {relative_path}\r\n",
 					"source_linked_service_name = 'adls_stlakerdv_ls'\r\n",
 					"\r\n",
 					"source_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(source_linked_service_name)\r\n",
 					"\r\n",
 					"sync_account_name = 'stlakebdvprdeastus001'\r\n",
 					"sync_container_name = 'comercial'\r\n",
-					"sync_relative_path = 'fact' + \r\n",
+					"sync_relative_path = 'dim' + {relative_path}\r\n",
 					"sync_linked_service_name = 'adls_stlakebdv_ls'\r\n",
 					"\r\n",
 					"sync_sas_token = mssparkutils.credentials.getConnectionStringOrCreds(sync_linked_service_name)"
 				],
-				"execution_count": 14
+				"execution_count": 2
 			},
 			{
 				"cell_type": "code",
