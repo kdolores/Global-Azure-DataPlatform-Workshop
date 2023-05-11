@@ -64,6 +64,10 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
+								"notebook": {
+									"referenceName": "business_dim_notebook",
+									"type": "NotebookReference"
+								},
 								"parameters": {
 									"relative_path": {
 										"value": {
